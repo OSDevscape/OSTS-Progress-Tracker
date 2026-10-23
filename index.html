@@ -95,5 +95,62 @@
       <div id="osrs-news-list" class="news-list" aria-live="polite"></div>
     </section>
   </main>
+
+  <script>
+    // Bind independently of app.js, before deferred app initialization.
+    (function () {
+      var button = document.getElementById("open-profiles");
+      var dialog = document.getElementById("saved-profiles");
+      if (!button || !dialog) return;
+      button.setAttribute("aria-controls", "saved-profiles");
+      button.setAttribute("aria-expanded", "false");
+      function syncVisibility() {
+        if (button.hidden) button.hidden = false;
+      }
+      syncVisibility();
+      new MutationObserver(syncVisibility).observe(button, {
+        attributes: true, attributeFilter: ["hidden"]
+      });
+      function closeProfiles() {
+        if (dialog.open) dialog.close();
+      }
+      document.addEventListener("click", function (event) {
+        var target = event.target instanceof Element ? event.target : null;
+        if (!target) return;
+        if (target.closest("#open-profiles")) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          try {
+            if (!dialog.open) dialog.showModal();
+            dialog.scrollTop = 0;
+            button.setAttribute("aria-expanded", "true");
+            document.body.classList.add("modal-open");
+          } catch (error) {
+            window.showAppError("Could not open saved profiles: " + error.message);
+          }
+          return;
+        }
+        if (target.closest('#saved-profiles [data-close="saved-profiles"]')) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          closeProfiles();
+          return;
+        }
+        if (target === dialog && dialog.open) {
+          var rect = dialog.getBoundingClientRect();
+          if (event.clientX < rect.left || event.clientX > rect.right ||
+              event.clientY < rect.top || event.clientY > rect.bottom) {
+            event.stopImmediatePropagation();
+            closeProfiles();
+          }
+        }
+      }, true);
+      dialog.addEventListener("close", function () {
+        button.setAttribute("aria-expanded", "false");
+        document.body.classList.toggle("modal-open", !!document.querySelector("dialog[open]"));
+        button.focus();
+      });
+    })();
+  </script>
 </body>
 </html>
