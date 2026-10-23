@@ -1,0 +1,20 @@
+/* OSRS official newsfeed on the tracker landing page. */
+.news-section{max-width:900px;margin:0 auto 28px;padding:18px;background:linear-gradient(155deg,#35291b,#2a2117);border-color:#806a46;box-shadow:0 8px 28px #0002}
+.news-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding-bottom:14px;border-bottom:1px solid #806a4670}
+.news-eyebrow{margin:0 0 4px;color:#c9a45c;font-size:10px;font-weight:850;letter-spacing:.15em}
+.news-header h2{font-size:clamp(19px,4vw,25px)}
+.news-intro{margin:5px 0 0;color:var(--muted);font-size:12px}
+.news-header-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:10px;font-size:12px}
+.news-header-actions .secondary-button{min-height:38px;padding:7px 11px}
+.news-status{margin:12px 0;color:var(--muted);font-size:12px}
+.news-status:empty{display:none}
+.news-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.news-card{min-width:0;padding:13px;border:1px solid #806a4680;border-radius:10px;background:#241b13;transition:border-color .15s,transform .15s}
+.news-card:hover{border-color:#c9a45c;transform:translateY(-1px)}
+.news-card a{display:block;color:var(--gold);font-weight:750;text-decoration:none;line-height:1.4}.news-card .news-image-link{margin:-13px -13px 12px;overflow:hidden;border-radius:9px 9px 0 0;background:#1a140e}.news-image{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;transition:transform .2s}.news-card:hover .news-image{transform:scale(1.025)}.news-card .news-title-link{color:var(--gold)}
+.news-card a:hover{text-decoration:underline}
+.news-meta{display:flex;flex-wrap:wrap;gap:6px 10px;margin-top:8px;color:var(--muted);font-size:10px}
+.news-category{color:#c9a45c;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.news-summary{margin:8px 0 0;color:#d0c0a0;font-size:12px;line-height:1.55}
+.news-empty{grid-column:1/-1;padding:18px;border:1px dashed #806a46;border-radius:9px;color:var(--muted);font-size:13px;text-align:center}
+@media(max-width:600px){.news-section{padding:14px}.news-header{flex-direction:column}.news-header-actions{justify-content:flex-start}.news-list{grid-template-columns:1fr}}

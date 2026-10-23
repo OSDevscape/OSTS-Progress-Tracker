@@ -1,0 +1,12 @@
+{
+  "name": "osrs-progress-tracker",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "generate:vapid": "node scripts/generate-vapid.mjs"
+  },
+  "dependencies": {
+    "@netlify/blobs": "latest",
+    "web-push": "^3.6.7"
+  }
+}

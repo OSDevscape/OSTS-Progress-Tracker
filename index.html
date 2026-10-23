@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Gateway · OSRS Progress Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="profiles.css">
+  <link rel="stylesheet" href="ui.css">
+  <link rel="stylesheet" href="wiki.css">
+  <link rel="stylesheet" href="news.css">
+  <script>
+    window.appReady = false;
+    window.showAppError = function(message) {
+      var el = document.getElementById("status");
+      if (el) { el.textContent = message; el.classList.add("error"); }
+    };
+    window.addEventListener("error", function(e) {
+      if (e.message) window.showAppError("App error: " + e.message + (e.lineno ? " — line " + e.lineno : ""));
+    });
+    window.addEventListener("unhandledrejection", function(e) {
+      window.showAppError("App error: " + (e.reason && e.reason.message ? e.reason.message : String(e.reason)));
+    });
+    window.addEventListener("load", function() {
+      if (!window.appReady) window.showAppError("The app did not start. Check that app.js and config.js are beside index.html.");
+    });
+  </script>
+  <script src="config.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="profiles.js" defer></script>
+  <script src="wiki.js" defer></script>
+  <script src="news.js" defer></script>
+  <script src="ui.js" defer></script>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#3b3021">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="OSRS Tracker">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/icons/app-192.png">
+<link rel="stylesheet" href="/pwa.css">
+<script src="/pwa.js" defer></script>
+</head>
+<body data-page="gateway">
+  <main class="app">
+    <section class="gateway">
+      <header class="gateway-header">
+        <h1>OSRS Progress Tracker</h1>
+        <p class="subtitle">Skills, progress, and your road to 99.</p>
+      </header>
+      <div class="panel">
+        <form id="lookup-form" onsubmit="return false;">
+          <label for="username">OSRS username</label>
+          <div class="search-row">
+            <input id="username" name="username" type="text" placeholder="Enter your username" maxlength="12" required autocomplete="off" autocapitalize="off" spellcheck="false">
+            <button id="lookup-button" class="primary" type="submit">Look Up &amp; Save</button>
+          </div>
+        </form>
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+        <a id="player-link" class="source-link" target="_blank" rel="noopener noreferrer" hidden>Open player on Wise Old Man ↗</a>
+        <noscript><p class="error">JavaScript is required for player lookups.</p></noscript>
+      </div>
+      <p class="gateway-note">Look up a player to save their stats on this device.</p>
+      <button id="open-profiles" class="secondary-button profiles-open-button" type="button" aria-haspopup="dialog">
+        <span>Saved Profiles</span><span id="saved-count" class="saved-count"></span><span aria-hidden="true">↗</span>
+      </button>
+    </section>
+
+    <dialog id="saved-profiles" class="profile-modal" aria-labelledby="saved-heading">
+      <div class="handle" aria-hidden="true"></div>
+      <header class="sheet-header profile-modal-header">
+        <div class="sheet-icon" aria-hidden="true">♙</div>
+        <div><h2 id="saved-heading" class="sheet-title">Saved Profiles</h2><div class="sheet-subtitle">Choose a saved player or update their snapshot.</div></div>
+        <button class="close" type="button" data-close="saved-profiles" aria-label="Close saved profiles">×</button>
+      </header>
+      <div class="profile-modal-body">
+        <div id="saved-list" class="saved-list"></div>
+        <p class="storage-note">Saved on this device. Open recalls saved stats; Update &amp; Open checks for a newer snapshot.</p>
+      </div>
+    </dialog>
+
+    <section class="news-section panel" aria-labelledby="osrs-news-title">
+      <div class="news-header">
+        <div>
+          <p class="news-eyebrow">FROM JAGEX</p>
+          <h2 id="osrs-news-title">OSRS News &amp; Updates</h2>
+          <p class="news-intro">The latest Old School RuneScape announcements, right here on your tracker.</p>
+        </div>
+        <div class="news-header-actions">
+          <button id="news-refresh" class="secondary-button" type="button">Refresh</button>
+          <a href="https://oldschool.runescape.com/" target="_blank" rel="noopener noreferrer">Official news ↗</a>
+        </div>
+      </div>
+      <p id="news-status" class="news-status" role="status" aria-live="polite">Loading OSRS news…</p>
+      <div id="osrs-news-list" class="news-list" aria-live="polite"></div>
+    </section>
+  </main>
+</body>
+</html>

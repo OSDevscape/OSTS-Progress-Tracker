@@ -1,0 +1,2289 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Bossing - OSRS Progress Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="ui.css">
+  <script>
+    window.appReady = false;
+    window.showAppError = function (message) { var el = document.getElementById("page-status") || document.getElementById("farm-status"); if (el) { el.textContent = message; el.classList.add("error"); } };
+    window.addEventListener("error", function (e) { if (e.message) window.showAppError("App error: " + e.message + (e.lineno ? " - line " + e.lineno : "")); });
+    window.addEventListener("unhandledrejection", function (e) { window.showAppError("App error: " + (e.reason && e.reason.message ? e.reason.message : String(e.reason))); });
+  </script>
+  <script src="config.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="ui.js" defer></script>
+  <style>
+    body[data-page="bossing"] #profile {
+      display: none !important;
+    }
+
+    .boss-card {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow: hidden;
+      gap: 4px
+    }
+
+    .boss-art {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 112px;
+      width: 100%;
+      background: #211b1455;
+      border-radius: 8px;
+      margin-bottom: 7px;
+      font-size: 10px;
+      color: var(--muted)
+    }
+
+    .boss-art img {
+      max-width: 95%;
+      max-height: 102px;
+      object-fit: contain;
+      filter: drop-shadow(0 5px 4px #0006)
+    }
+
+    .boss-card .boss-name {
+      min-height: 40px;
+      line-height: 1.4
+    }
+
+    .boss-card .boss-count {
+      margin-top: 2px
+    }
+
+    .boss-hero {
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+      margin: 20px 0;
+      background: #211b1444;
+      border-radius: 12px
+    }
+
+    .boss-hero img {
+      max-width: 100%;
+      max-height: 230px;
+      object-fit: contain
+    }
+
+    .boss-detail-group {
+      margin: 9px 0;
+      border: 1px solid #806a4680;
+      border-radius: 10px;
+      background: #211b1425;
+      overflow: hidden
+    }
+
+    .boss-detail-group>summary {
+      padding: 12px 13px;
+      cursor: pointer;
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 700
+    }
+
+    .boss-detail-group[open]>summary {
+      border-bottom: 1px solid #806a4660;
+      background: var(--raised)
+    }
+
+    .boss-group-body {
+      padding: 12px;
+      min-width: 0
+    }
+
+    .boss-wiki-scroll {
+      max-width: 100%;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      margin: 7px 0
+    }
+
+    .boss-wiki-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px
+    }
+
+    .boss-wiki-table th,
+    .boss-wiki-table td {
+      padding: 8px 6px;
+      border: 1px solid #806a4655;
+      vertical-align: middle;
+      text-align: center
+    }
+
+    .boss-wiki-table th {
+      font-weight: 600;
+      color: var(--gold)
+    }
+
+    .boss-wiki-table td:first-child:not([colspan]) {
+      text-align: left
+    }
+
+    .boss-wiki-table img {
+      max-width: 28px;
+      max-height: 28px;
+      object-fit: contain;
+      vertical-align: middle
+    }
+
+    .boss-wiki-table a {
+      font-size: inherit
+    }
+
+    .boss-wiki-table sup {
+      font-size: 9px
+    }
+
+    .boss-guide {
+      font-size: 13px;
+      line-height: 1.65;
+      overflow-wrap: anywhere
+    }
+
+    .boss-guide p {
+      margin: 10px 0
+    }
+
+    .boss-guide h2 {
+      font-size: 19px;
+      margin: 22px 0 10px
+    }
+
+    .boss-guide h3 {
+      font-size: 17px;
+      margin: 18px 0 9px
+    }
+
+    .boss-guide h4,
+    .boss-guide h5,
+    .boss-guide h6 {
+      font-size: 14px;
+      margin: 14px 0 8px
+    }
+
+    .boss-guide img {
+      max-width: 100%;
+      height: auto;
+      object-fit: contain
+    }
+
+    .boss-guide table {
+      border-collapse: collapse;
+      min-width: 100%;
+      font-size: 11px
+    }
+
+    .boss-guide td,
+    .boss-guide th {
+      padding: 7px;
+      border: 1px solid #806a4670;
+      vertical-align: top
+    }
+
+    .boss-guide th {
+      background: var(--raised);
+      color: var(--gold)
+    }
+
+    .boss-guide ul,
+    .boss-guide ol {
+      padding-left: 22px
+    }
+
+    .boss-guide pre {
+      white-space: pre-wrap
+    }
+
+    .boss-guide-tab-title {
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+      background: var(--raised)
+    }
+
+    .boss-log-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px
+    }
+
+    .boss-log-item {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 7px;
+      min-width: 0;
+      width: 100%;
+      padding: 12px 6px;
+      border: 1px solid #806a4670;
+      border-radius: 9px;
+      background: var(--raised);
+      text-align: center;
+      color: var(--text);
+      cursor: pointer
+    }
+
+    .boss-log-item:hover {
+      border-color: var(--gold);
+      background: #5b492e
+    }
+
+    .boss-log-item.is-collected {
+      border-color: var(--green);
+      background: linear-gradient(#52603a55, #4a3d2a)
+    }
+
+    .boss-log-item.is-missing .boss-log-icon img {
+      filter: grayscale(1);
+      opacity: .45
+    }
+
+    .boss-log-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 36px;
+      width: 42px
+    }
+
+    .boss-log-icon img {
+      max-width: 40px;
+      max-height: 36px;
+      object-fit: contain
+    }
+
+    .boss-log-name {
+      font-size: 11px;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+      color: var(--gold)
+    }
+
+    .boss-log-badge {
+      font-size: 10px;
+      color: var(--muted);
+      overflow-wrap: anywhere;
+      max-width: 100%
+    }
+
+    .boss-log-item.is-collected .boss-log-badge {
+      color: var(--green);
+      font-weight: 700
+    }
+
+    .boss-log-count {
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 5px
+    }
+
+    .boss-log-progress {
+      display: block;
+      width: 100%;
+      height: 8px;
+      margin: 0 0 12px;
+      accent-color: var(--green)
+    }
+
+    .boss-log-storage-warning {
+      font-size: 12px
+    }
+
+    .boss-reference-note {
+      font-size: 11px;
+      color: var(--muted)
+    }
+
+    .boss-status {
+      margin-top: 18px
+    }
+
+    .boss-retry {
+      margin-top: 10px
+    }
+
+    #collection-item-dialog {
+      width: min(calc(100% - 28px), 420px);
+      max-width: 420px;
+      margin: auto;
+      border-radius: 18px;
+      max-height: 90dvh
+    }
+
+    #collection-item-dialog .sheet-header {
+      padding: 20px 18px 14px
+    }
+
+    #collection-item-dialog .sheet-title {
+      font-size: 20px
+    }
+
+    #collection-item-dialog .sheet-subtitle {
+      font-size: 11px;
+      overflow-wrap: anywhere
+    }
+
+    #collection-item-dialog .sheet-body {
+      padding: 16px 18px 22px
+    }
+
+    .collection-item-art {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100px;
+      margin-bottom: 16px;
+      background: #211b1444;
+      border-radius: 12px
+    }
+
+    .collection-item-art img {
+      max-width: 100px;
+      max-height: 90px;
+      object-fit: contain;
+      image-rendering: pixelated
+    }
+
+    .collection-item-state {
+      margin: 0 0 8px;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 700
+    }
+
+    .collection-item-state.is-collected {
+      color: var(--green)
+    }
+
+    .collection-item-date {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center
+    }
+
+    .collection-item-actions {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px
+    }
+
+    .collection-item-actions button {
+      width: 100%
+    }
+
+    .collection-item-message {
+      font-size: 12px;
+      min-height: 18px;
+      overflow-wrap: anywhere
+    }
+
+    .collection-item-message:empty {
+      display: none
+    }
+
+    .collection-quantity-controls {
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr) 46px;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px
+    }
+
+    .collection-quantity-controls button {
+      width: 46px;
+      min-height: 46px;
+      padding: 0;
+      font-size: 25px;
+      line-height: 1
+    }
+
+    .collection-quantity-controls input {
+      height: 46px;
+      text-align: center;
+      font-size: 19px;
+      min-width: 0
+    }
+
+    .collection-quantity-label {
+      margin-top: 16px
+    }
+
+    .collection-quantity-help {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 8px 0
+    }
+
+    .collection-drop-rate {
+      padding: 10px 0 14px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid #806a4660
+    }
+
+    .collection-rate-label {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .5px
+    }
+
+    .collection-rate-value {
+      margin: 4px 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gold);
+      overflow-wrap: anywhere
+    }
+
+    .collection-rate-note {
+      margin: 5px 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+      overflow-wrap: anywhere
+    }
+
+    .collection-rate-entry+.collection-rate-entry {
+      border-top: 1px solid #806a4644;
+      margin-top: 9px;
+      padding-top: 6px
+    }
+
+    .collection-drop-rate .source-link {
+      margin-top: 5px;
+      margin-right: 12px;
+      font-size: 11px
+    }
+
+    .collection-rate-retry {
+      font-size: 11px;
+      min-height: 34px;
+      padding: 6px 9px;
+      margin-top: 7px;
+      margin-right: 8px
+    }
+
+    @media(min-width:700px) {
+      .boss-art {
+        height: 135px
+      }
+
+      .boss-art img {
+        max-height: 125px
+      }
+
+      .boss-log-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr))
+      }
+    }
+
+    @media(max-width:360px) {
+      .boss-art {
+        height: 90px
+      }
+
+      .boss-art img {
+        max-height: 80px
+      }
+
+      .boss-log-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+
+      .boss-group-body {
+        padding: 8px
+      }
+    }
+
+    /* Wiki-style calculator: plain paragraphs, probability bullets and the Wiki's flavour text. */
+    .dry-section {
+      margin-top: 20px;
+      border-top: 1px solid var(--border);
+      padding-top: 12px
+    }
+
+    .dry-section>summary {
+      cursor: pointer;
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 5px 0
+    }
+
+    .dry-body {
+      padding-top: 5px
+    }
+
+    .dry-body label {
+      margin-top: 13px
+    }
+
+    .dry-body .note {
+      font-size: 11px
+    }
+
+    .dry-copy {
+      margin-top: 6px;
+      padding: 5px 8px;
+      min-height: 34px;
+      font-size: 11px
+    }
+
+    .dry-calculate {
+      width: 100%;
+      margin-top: 15px
+    }
+
+    .dry-message {
+      font-size: 13px;
+      overflow-wrap: anywhere
+    }
+
+    .dry-message:empty {
+      display: none
+    }
+
+    .dry-results {
+      display: block;
+      margin: 16px 0;
+      font-size: 13px;
+      line-height: 1.65;
+      overflow-wrap: anywhere
+    }
+
+    .dry-results p {
+      margin: 10px 0
+    }
+
+    .dry-results ul {
+      padding-left: 21px;
+      margin: 10px 0
+    }
+
+    .dry-results li {
+      margin: 7px 0
+    }
+
+    .dry-flavour {
+      color: var(--gold)
+    }
+
+    .dry-flavour img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      vertical-align: middle
+    }
+
+    .dry-source-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 12px
+    }
+
+    .dry-source-links a {
+      font-size: 11px
+    }
+  
+/* Dry calculator: shared brown and gold application theme. */
+.dry-heading{display:flex;align-items:center;justify-content:space-between;margin:10px 0;gap:12px}.dry-heading h3{margin:0;color:var(--gold);font-size:16px}.dry-info{border:1px solid var(--border);color:var(--muted);background:var(--panel);border-radius:50%;width:34px;height:34px;min-height:34px;padding:0;cursor:pointer;font-size:18px}.dry-info:hover{background:var(--raised);color:var(--gold)}
+.dry-streak-card{background:var(--raised);border:1px solid var(--border);border-radius:18px;padding:20px 16px;margin:18px 0;color:var(--text)}.dry-streak-card[hidden],#dry-details[hidden],#dry-results[hidden]{display:none!important}.dry-card-header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.dry-card-header h3{margin:0;font-size:17px;color:var(--gold)}.dry-status{color:var(--dry-color,var(--gold));background:var(--panel);border:1px solid currentColor;border-radius:10px;padding:7px 10px;font-size:12px;font-weight:700;letter-spacing:.05em}.dry-kills{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:22px 0}.dry-kills strong{color:var(--gold);font-size:clamp(38px,12vw,58px);line-height:1.1;letter-spacing:-.04em;font-weight:650}.dry-kills span{color:var(--muted);font:12px ui-monospace,monospace}.dry-track{height:12px;position:relative;border-radius:20px;background:linear-gradient(to right,var(--border) 0% 24.3%,var(--raised) 24.3% 25%,#d7ad4e 25% 49.3%,var(--raised) 49.3% 50%,#c77d35 50% 74.3%,var(--raised) 74.3% 75%,#ac5849 75% 100%)}.dry-dot{position:absolute;top:50%;left:clamp(1%,var(--dry-position,0%),99%);width:18px;height:18px;border:4px solid var(--raised);border-radius:50%;background:#fff0c7;transform:translate(-50%,-50%);box-sizing:content-box}.dry-scale{display:flex;justify-content:space-between;margin-top:12px;color:var(--muted);font:11px ui-monospace,monospace}.dry-streak-card p{font-size:14px;line-height:1.65;color:var(--text);margin:22px 0 0}.dry-streak-card .dry-caveat{font-size:11px;color:var(--muted);margin-top:12px}#dry-details{margin:14px 0}#dry-details>summary{color:var(--gold);cursor:pointer;font-size:13px}
+#dry-help-dialog{box-sizing:border-box;width:min(440px,calc(100% - 28px));max-height:88dvh;margin:auto;padding:24px;border:1px solid var(--border);border-radius:20px;background:var(--panel);color:var(--text);overflow:auto;overscroll-behavior:contain;box-shadow:0 24px 100px #0009}#dry-help-dialog::backdrop{background:#0009}#dry-help-dialog h2{color:var(--gold);font-size:24px;margin:0 0 20px;line-height:1.3}#dry-help-dialog p{font-size:14px;color:var(--muted);line-height:1.65;margin:0 0 16px}.dry-help-box{background:var(--raised);border:1px solid var(--border);border-radius:14px;padding:16px;margin:14px 0}.dry-help-box h3{color:var(--gold);margin:0 0 8px;font-size:15px}#dry-help-dialog .dry-help-box p{color:var(--text);margin:0}.dry-equation{color:var(--gold);font:600 13px ui-monospace,monospace;margin-top:12px;overflow-wrap:anywhere}.dry-legend{list-style:none;padding:0;margin:22px 0}.dry-legend li{color:var(--text);display:flex;align-items:center;gap:10px;margin:15px 0;font-size:14px}.dry-legend i{width:13px;height:13px;border-radius:4px;background:var(--swatch);flex-shrink:0}.dry-legend small{margin-left:auto;color:var(--muted);font:12px ui-monospace,monospace}#dry-help-close{width:100%;min-height:48px;border-radius:12px;margin-top:8px}.dry-info:focus-visible{outline:2px solid var(--gold);outline-offset:3px}@media(max-width:360px){#dry-help-dialog{padding:20px 16px}.dry-streak-card{padding:16px 12px}.dry-status{font-size:11px}}
+
+
+.raid-aware-panel{border:1px solid var(--border);background:var(--raised);border-radius:14px;padding:14px;margin:14px 0}.raid-aware-panel[hidden],.raid-aware-panel [hidden]{display:none!important}.raid-aware-panel h4{margin:0 0 8px;color:var(--gold);font-size:15px}.raid-aware-panel .note{margin:8px 0;font-size:12px}.raid-aware-panel select,.raid-aware-panel input[type=number]{width:100%;box-sizing:border-box}.raid-eligible-label{display:flex!important;align-items:center;gap:9px}.raid-eligible-label input{width:18px;height:18px;min-height:18px;flex:0 0 auto}
+
+</style>
+</head>
+
+<body data-page="bossing">
+  <main class="app">
+    <header class="page-toolbar"><a class="brand" href="index.html">OSRS Progress Tracker</a><button id="open-settings"
+        class="gear-button" type="button" aria-label="Open player settings" aria-haspopup="dialog"
+        aria-controls="settings-dialog" disabled></button></header>
+    <nav class="page-tabs" aria-label="Profile pages"><a id="skills-link" href="skills.html">Skills</a><a
+        id="bossing-link" href="bossing.html" aria-current="page">Bossing</a><a href="farm.html">Farm Runs</a></nav>
+    <p id="page-status" class="status skills-status" role="status" aria-live="polite"></p>
+    <section id="profile" aria-label="Player statistics" hidden>
+      <div class="profile-header">
+        <div>
+          <h1 id="player-name"></h1>
+          <div id="snapshot-date" class="snapshot-date"></div>
+        </div>
+        <div class="totals">
+          <div><span id="total-level" class="total-value">-</span><span class="total-label">Total level</span></div>
+          <div><span id="total-xp" class="total-value">-</span><span class="total-label">Total XP</span></div>
+        </div>
+      </div>
+    </section>
+    <section id="bossing-content" hidden>
+      <div class="panel">
+        <h2 id="boss-heading" style="font-size:18px">Bossing</h2>
+        <p id="boss-summary" class="muted"></p>
+        <p id="boss-note" class="note">Open an encounter for combat information, strategies and your manually tracked Collection Log.
+        </p>
+      </div>
+      <div class="boss-controls">
+        <div><label for="boss-search">Search encounters</label><input id="boss-search" type="search"
+            placeholder="Search bosses or raids" autocomplete="off"></div>
+        <div><label for="boss-filter">Show</label><select id="boss-filter">
+            <option value="all">All encounters</option>
+            <option value="raids">Raids</option>
+            <option value="recorded">With completions</option>
+          </select></div>
+      </div>
+      <div id="boss-list" class="boss-list"></div>
+      <p id="boss-empty" class="empty-state" hidden>No matching encounters.</p>
+    </section>
+    <footer>Personal stats from Wise Old Man | Encounter content, images and Collection Log lists from OSRS Wiki<br><a
+        href="https://oldschool.runescape.wiki/w/Collection_log" target="_blank" rel="noopener noreferrer">Collection
+        Log source</a> · <a href="https://meta.weirdgloop.org/w/Meta:Copyrights" target="_blank"
+        rel="noopener noreferrer">Licensing & attribution</a></footer>
+  </main>
+  <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title">
+    <header class="sheet-header">
+      <div>
+        <h2 id="settings-title" class="sheet-title">Player Settings</h2>
+        <p id="settings-player" class="method-subtitle"></p>
+      </div><button class="close" type="button" data-close="settings-dialog" aria-label="Close settings"></button>
+    </header>
+    <div class="settings-options"><button id="refresh-player" class="secondary-button" type="button">Update
+        Stats</button><button id="change-player" class="secondary-button" type="button">Change Player</button>
+      <p class="note">Update Stats retrieves Wise Old Man's latest stored snapshot. It does not request a new Jagex
+        snapshot.</p>
+      <p id="settings-status" class="status" role="status" aria-live="polite"></p>
+    </div>
+  </dialog>
+  <dialog id="boss-dialog" aria-labelledby="boss-title">
+    <div class="handle" aria-hidden="true"></div>
+    <header class="sheet-header">
+      <div>
+        <h2 id="boss-title" class="sheet-title"></h2>
+        <p class="sheet-subtitle">Your stats, combat information, strategies & Collection Log</p>
+      </div><button class="close" type="button" data-close="boss-dialog" aria-label="Close boss details"></button>
+    </header>
+    <div class="sheet-body">
+      <h3 class="section-label">Your stats</h3>
+      <div class="boss-detail-stats">
+        <div class="stat"><span id="boss-detail-count" class="stat-value"></span><span class="stat-label">Recorded
+            completions</span></div>
+        <div class="stat"><span id="boss-detail-rank" class="stat-value"></span><span class="stat-label">Hiscores
+            rank</span></div>
+      </div>
+      <p id="boss-detail-note" class="wiki-intro"></p><a id="boss-wiki-link" class="source-link" target="_blank"
+        rel="noopener noreferrer">Find this encounter on OSRS Wiki</a>
+      <p class="note">Includes bosses, raids, and variants. Missing counts are not treated as zero.</p>
+      <section id="boss-reference" aria-label="Combat information, strategies and Collection Log"></section>
+    </div>
+  </dialog>
+  <dialog id="collection-item-dialog" aria-labelledby="collection-item-title" aria-describedby="collection-item-help">
+    <header class="sheet-header">
+      <div>
+        <h2 id="collection-item-title" class="sheet-title"></h2>
+        <p id="collection-item-context" class="sheet-subtitle"></p>
+      </div><button class="close" type="button" data-close="collection-item-dialog"
+        aria-label="Close item details"></button>
+    </header>
+    <div class="sheet-body">
+      <div id="collection-item-art" class="collection-item-art"></div>
+      <section id="collection-item-drop-rate" class="collection-drop-rate" aria-label="Wiki drop rate"
+        aria-live="polite"></section>
+      <p id="collection-item-state" class="collection-item-state"></p>
+      <p id="collection-item-date" class="collection-item-date"></p>
+      <p id="collection-item-help" class="note">Manual tracking for the selected player. Saved on this browser/device
+        only; not synced with RuneScape. The same item shares one quantity across its collection pages.</p>
+      <form id="collection-item-quantity-form" novalidate><label class="collection-quantity-label"
+          for="collection-item-quantity">Quantity obtained</label>
+        <div class="collection-quantity-controls"><button id="collection-item-minus" class="secondary-button"
+            type="button" aria-label="Remove one item">−</button><input id="collection-item-quantity" type="number"
+            min="0" step="1" inputmode="numeric" autocomplete="off" aria-describedby="collection-quantity-help"
+            value="0"><button id="collection-item-plus" class="secondary-button" type="button"
+            aria-label="Add one item">+</button></div>
+        <p id="collection-quantity-help" class="collection-quantity-help">− / + saves immediately. For a typed number,
+          choose Save quantity. Zero means uncollected; duplicates still fill only one collection slot.</p>
+        <div class="collection-item-actions"><button id="collection-item-save" class="primary" type="submit">Save
+            quantity</button></div>
+      </form>
+      <a id="collection-item-wiki" class="source-link" target="_blank" rel="noopener noreferrer">View item on OSRS
+        Wiki</a>
+      <p id="collection-item-message" class="collection-item-message" role="status" aria-live="polite"></p>
+
+      <details id="dry-section" class="dry-section">
+        <summary>Dry calculator</summary>
+        <div class="dry-body"><div class="dry-heading"><h3>Dry calculator</h3><button id="dry-info" class="dry-info" type="button" aria-label="How dry streak works" aria-haspopup="dialog" aria-controls="dry-help-dialog">ⓘ</button></div>
+          <p id="dry-context" class="note"></p>
+          <form id="dry-form" novalidate>
+            <label for="dry-rate">Drop chance</label><input id="dry-rate" type="text" placeholder="1/512"
+              autocomplete="off" aria-describedby="dry-rate-help">
+            <p id="dry-rate-help" class="note">Simple, unambiguous Wiki rates prefill here. You can override them. Use
+              1/512 or 512; basic arithmetic such as 1/(256*2) is supported.</p>
+            <section id="raid-aware-panel" class="raid-aware-panel" hidden aria-labelledby="raid-aware-title">
+              <h4 id="raid-aware-title">Raid-aware calculation</h4>
+              <p class="note">Choose what your entered rate represents. If it is the item's share of the unique table, the calculator will apply supported raid mechanics to estimate your personal chance per completion.</p>
+              <label for="raid-rate-kind">Rate entered above</label>
+              <select id="raid-rate-kind"><option value="personal">Personal chance per raid</option><option value="unique-share">Item share of the unique table</option></select>
+              <label for="raid-mode">Raid mode</label>
+              <select id="raid-mode"></select>
+              <label for="raid-team-size">Team size</label>
+              <input id="raid-team-size" type="number" min="1" max="100" step="1" value="1" inputmode="numeric">
+              <div id="raid-cox-fields" hidden>
+                <label for="raid-personal-points">Your personal reward points</label><input id="raid-personal-points" type="number" min="0" step="1" value="30000" inputmode="numeric">
+                <label for="raid-group-points">Total team reward points</label><input id="raid-group-points" type="number" min="0" step="1" value="30000" inputmode="numeric">
+              </div>
+              <div id="raid-tob-fields" hidden>
+                <label for="raid-tob-share">Your estimated share of the team's unique chance (%)</label><input id="raid-tob-share" type="number" min="0" max="100" step="0.1" value="100" inputmode="decimal">
+              </div>
+              <div id="raid-toa-fields" hidden>
+                <label for="raid-level">Raid level</label><input id="raid-level" type="number" min="0" max="600" step="1" value="300" inputmode="numeric">
+                <label for="raid-toa-personal">Your final reward points</label><input id="raid-toa-personal" type="number" min="0" step="1" value="25000" inputmode="numeric">
+                <label for="raid-toa-total">Total team reward points</label><input id="raid-toa-total" type="number" min="0" step="1" value="25000" inputmode="numeric">
+              </div>
+              <label class="raid-eligible-label"><input id="raid-eligible" type="checkbox" checked> I am eligible to receive this reward</label>
+              <p id="raid-aware-summary" class="note" role="status" aria-live="polite"></p>
+            </section>
+            <label for="dry-attempts">Kill count</label><input id="dry-attempts" type="number" min="0" step="1"
+              inputmode="numeric" autocomplete="off">
+            <button id="dry-use-kc" class="secondary-button dry-copy" type="button">Use boss completions</button>
+            <label for="dry-drops">Drops obtained</label><input id="dry-drops" type="number" min="0" step="1"
+              inputmode="numeric" autocomplete="off" value="0">
+            <button id="dry-use-quantity" class="secondary-button dry-copy" type="button">Use saved item
+              quantity</button>
+            <button class="primary dry-calculate" type="submit">Calculate</button>
+          </form>
+          <p id="dry-message" class="dry-message" role="status" aria-live="polite"></p>
+          <section id="dry-streak-card" class="dry-streak-card" aria-live="polite" hidden><div class="dry-card-header"><h3 id="dry-card-title">Dry streak</h3><span id="dry-status" class="dry-status"></span></div><div class="dry-kills"><strong id="dry-count"></strong><span id="dry-count-label"></span></div><div id="dry-meter-wrap"><div id="dry-meter" class="dry-track" role="meter" aria-label="Drop-rate multiple" aria-valuemin="0" aria-valuemax="4"><span class="dry-dot" aria-hidden="true"></span></div><div class="dry-scale" aria-hidden="true"><span>0</span><span>1×</span><span>2×</span><span>3×</span><span>4×+</span></div></div><p id="dry-tail"></p><p id="dry-caveat" class="dry-caveat"></p></section><details id="dry-details" hidden><summary>Detailed probabilities</summary><div id="dry-results" class="dry-results" hidden></div></details>
+          <p class="note">Calculator inputs do not change your collection quantities or the displayed Wiki reference
+            rate. Use successful drop events, not units in a stack. Shared items, multiple reward rolls and changing
+            rates may require adjusted inputs or a different model.</p>
+          <div class="dry-source-links"><a id="dry-item-source" class="source-link" target="_blank"
+              rel="noopener noreferrer">Item drop sources</a><a class="source-link"
+              href="https://oldschool.runescape.wiki/w/Calculator:Dry_calc" target="_blank"
+              rel="noopener noreferrer">Wiki dry calculator</a><a class="source-link"
+              href="https://oldschool.runescape.wiki/w/Module:Dry_calc" target="_blank"
+              rel="noopener noreferrer">Calculator code and flavour text: OSRS Wiki</a></div>
+        </div>
+      </details>
+
+    </div>
+  </dialog>
+  <!-- Existing Collection Log membership. Saved quantities use the original per-player storage key. -->
+  <script id="boss-collection-data" type="application/json">{
+  "Abyssal Sire": [
+    "Abyssal orphan",
+    "Unsired",
+    "Abyssal head",
+    "Bludgeon spine",
+    "Bludgeon claw",
+    "Bludgeon axon",
+    "Jar of miasma",
+    "Abyssal dagger",
+    "Abyssal whip"
+  ],
+  "Alchemical Hydra": [
+    "Ikkle hydra",
+    "Hydra's claw",
+    "Hydra tail",
+    "Hydra leather",
+    "Hydra's fang",
+    "Hydra's eye",
+    "Hydra's heart",
+    "Dragon knife",
+    "Dragon thrownaxe",
+    "Jar of chemicals",
+    "Alchemical hydra heads"
+  ],
+  "Amoxliatl": [
+    "Moxi",
+    "Glacial temotli",
+    "Pendant of ates (inert)",
+    "Frozen tear"
+  ],
+  "Araxxor": [
+    "Nid",
+    "Araxyte venom sack",
+    "Spider cave teleport",
+    "Araxyte fang",
+    "Noxious point",
+    "Noxious blade",
+    "Noxious pommel",
+    "Araxyte head",
+    "Jar of venom",
+    "Coagulated venom"
+  ],
+  "Barrows Chests": [
+    "Karil's coif",
+    "Karil's leathertop",
+    "Karil's leatherskirt",
+    "Karil's crossbow",
+    "Ahrim's hood",
+    "Ahrim's robetop",
+    "Ahrim's robeskirt",
+    "Ahrim's staff",
+    "Dharok's helm",
+    "Dharok's platebody",
+    "Dharok's platelegs",
+    "Dharok's greataxe",
+    "Guthan's helm",
+    "Guthan's platebody",
+    "Guthan's chainskirt",
+    "Guthan's warspear",
+    "Torag's helm",
+    "Torag's platebody",
+    "Torag's platelegs",
+    "Torag's hammers",
+    "Verac's helm",
+    "Verac's brassard",
+    "Verac's plateskirt",
+    "Verac's flail",
+    "Bolt rack"
+  ],
+  "Brutus": [
+    "Beef",
+    "Mooleta",
+    "Bottomless milk bucket (empty)",
+    "Cow slippers"
+  ],
+  "Bryophyta": [
+    "Bryophyta's essence"
+  ],
+  "Callisto and Artio": [
+    "Callisto cub",
+    "Tyrannical ring",
+    "Dragon pickaxe",
+    "Dragon 2h sword",
+    "Claws of callisto",
+    "Voidwaker hilt"
+  ],
+  "Cerberus": [
+    "Hellpuppy",
+    "Eternal crystal",
+    "Pegasian crystal",
+    "Primordial crystal",
+    "Jar of souls",
+    "Smouldering stone",
+    "Key master teleport"
+  ],
+  "Chaos Elemental": [
+    "Pet chaos elemental",
+    "Dragon pickaxe",
+    "Dragon 2h sword"
+  ],
+  "Chaos Fanatic": [
+    "Pet chaos elemental",
+    "Odium shard 1",
+    "Malediction shard 1"
+  ],
+  "Commander Zilyana": [
+    "Pet zilyana",
+    "Armadyl crossbow",
+    "Saradomin hilt",
+    "Saradomin sword",
+    "Saradomin's light",
+    "Godsword shard 1",
+    "Godsword shard 2",
+    "Godsword shard 3"
+  ],
+  "Corporeal Beast": [
+    "Pet dark core",
+    "Elysian sigil",
+    "Spectral sigil",
+    "Arcane sigil",
+    "Holy elixir",
+    "Spirit shield",
+    "Jar of spirits"
+  ],
+  "Crazy archaeologist": [
+    "Odium shard 2",
+    "Malediction shard 2",
+    "Fedora"
+  ],
+  "Dagannoth Kings": [
+    "Pet dagannoth prime",
+    "Pet dagannoth supreme",
+    "Pet dagannoth rex",
+    "Berserker ring",
+    "Archers ring",
+    "Seers ring",
+    "Warrior ring",
+    "Dragon axe",
+    "Seercull",
+    "Mud battlestaff"
+  ],
+  "Deranged Archaeologist": [
+    "Steel ring"
+  ],
+  "Doom of Mokhaiotl": [
+    "Dom",
+    "Avernic treads",
+    "Eye of ayak (uncharged)",
+    "Mokhaiotl cloth",
+    "Mokhaiotl waystone",
+    "Demon tear"
+  ],
+  "Duke Sucellus": [
+    "Baron",
+    "Eye of the duke",
+    "Virtus mask",
+    "Virtus robe top",
+    "Virtus robe bottom",
+    "Magus vestige",
+    "Ice quartz",
+    "Frozen tablet",
+    "Chromium ingot",
+    "Awakener's orb"
+  ],
+  "The Fight Caves": [
+    "Tzrek-jad",
+    "Fire cape"
+  ],
+  "Fortis Colosseum": [
+    "Smol heredit",
+    "Dizana's quiver (uncharged)",
+    "Sunfire fanatic cuirass",
+    "Sunfire fanatic chausses",
+    "Sunfire fanatic helm",
+    "Echo crystal",
+    "Tonalztics of ralos (uncharged)",
+    "Sunfire splinters",
+    "Uncut onyx"
+  ],
+  "The Gauntlet": [
+    "Youngllef",
+    "Crystal armour seed",
+    "Crystal weapon seed",
+    "Enhanced crystal weapon seed",
+    "Gauntlet cape"
+  ],
+  "General Graardor": [
+    "Pet general graardor",
+    "Bandos chestplate",
+    "Bandos tassets",
+    "Bandos boots",
+    "Bandos hilt",
+    "Godsword shard 1",
+    "Godsword shard 2",
+    "Godsword shard 3"
+  ],
+  "Giant Mole": [
+    "Baby mole",
+    "Mole skin",
+    "Mole claw"
+  ],
+  "Grotesque Guardians": [
+    "Noon",
+    "Black tourmaline core",
+    "Granite gloves",
+    "Granite ring",
+    "Granite hammer",
+    "Jar of stone",
+    "Granite dust"
+  ],
+  "Hespori": [
+    "Bottomless compost bucket",
+    "Iasor seed",
+    "Kronos seed",
+    "Attas seed"
+  ],
+  "The Hueycoatl": [
+    "Huberte",
+    "Dragon hunter wand",
+    "Tome of earth (empty)",
+    "Soiled page",
+    "Hueycoatl hide",
+    "Huasca seed"
+  ],
+  "The Inferno": [
+    "Jal-nib-rek",
+    "Infernal cape"
+  ],
+  "Kalphite Queen": [
+    "Kalphite princess",
+    "Kq head",
+    "Jar of sand",
+    "Dragon 2h sword",
+    "Dragon chainbody",
+    "Dragon pickaxe"
+  ],
+  "King Black Dragon": [
+    "Prince black dragon",
+    "Kbd heads",
+    "Dragon pickaxe",
+    "Draconic visage"
+  ],
+  "Kraken": [
+    "Pet kraken",
+    "Kraken tentacle",
+    "Trident of the seas",
+    "Jar of dirt"
+  ],
+  "Kree'arra": [
+    "Pet kree'arra",
+    "Armadyl helmet",
+    "Armadyl chestplate",
+    "Armadyl chainskirt",
+    "Armadyl hilt",
+    "Godsword shard 1",
+    "Godsword shard 2",
+    "Godsword shard 3"
+  ],
+  "K'ril Tsutsaroth": [
+    "Pet k'ril tsutsaroth",
+    "Staff of the dead",
+    "Zamorakian spear",
+    "Steam battlestaff",
+    "Zamorak hilt",
+    "Godsword shard 1",
+    "Godsword shard 2",
+    "Godsword shard 3"
+  ],
+  "The Leviathan": [
+    "Lil'viathan",
+    "Leviathan's lure",
+    "Virtus mask",
+    "Virtus robe top",
+    "Virtus robe bottom",
+    "Venator vestige",
+    "Smoke quartz",
+    "Scarred tablet",
+    "Chromium ingot",
+    "Awakener's orb"
+  ],
+  "Moons of Peril": [
+    "Eclipse moon chestplate",
+    "Eclipse moon tassets",
+    "Eclipse moon helm",
+    "Eclipse atlatl",
+    "Blue moon chestplate",
+    "Blue moon tassets",
+    "Blue moon helm",
+    "Blue moon spear",
+    "Blood moon chestplate",
+    "Blood moon tassets",
+    "Blood moon helm",
+    "Dual macuahuitl",
+    "Atlatl dart"
+  ],
+  "Nex": [
+    "Nexling",
+    "Ancient hilt",
+    "Nihil horn",
+    "Zaryte vambraces",
+    "Torva full helm (damaged)",
+    "Torva platebody (damaged)",
+    "Torva platelegs (damaged)",
+    "Nihil shard"
+  ],
+  "The Nightmare": [
+    "Little nightmare",
+    "Inquisitor's mace",
+    "Inquisitor's great helm",
+    "Inquisitor's hauberk",
+    "Inquisitor's plateskirt",
+    "Nightmare staff",
+    "Volatile orb",
+    "Harmonised orb",
+    "Eldritch orb",
+    "Jar of dreams",
+    "Slepey tablet",
+    "Parasitic egg"
+  ],
+  "Obor": [
+    "Hill giant club"
+  ],
+  "Phantom Muspah": [
+    "Muphin",
+    "Venator shard",
+    "Ancient icon",
+    "Charged ice",
+    "Frozen cache",
+    "Ancient essence"
+  ],
+  "Royal Titans": [
+    "Bran",
+    "Deadeye prayer scroll",
+    "Mystic vigour prayer scroll",
+    "Giantsoul amulet (uncharged)",
+    "Ice element staff crown",
+    "Fire element staff crown",
+    "Desiccated page"
+  ],
+  "Sarachnis": [
+    "Sraracha",
+    "Jar of eyes",
+    "Giant egg sac(full)",
+    "Sarachnis cudgel",
+    "Pristine spider silk"
+  ],
+  "Scorpia": [
+    "Scorpia's offspring",
+    "Odium shard 3",
+    "Malediction shard 3",
+    "Dragon 2h sword"
+  ],
+  "Scurrius": [
+    "Scurry",
+    "Scurrius' spine"
+  ],
+  "Shellbane Gryphon": [
+    "Gull",
+    "Jar of feathers",
+    "Belle's folly (tarnished)",
+    "Gryphon feather"
+  ],
+  "Skotizo": [
+    "Skotos",
+    "Jar of darkness",
+    "Dark claw",
+    "Dark totem",
+    "Uncut onyx",
+    "Ancient shard"
+  ],
+  "Tempoross": [
+    "Tiny tempor",
+    "Big harpoonfish",
+    "Spirit angler headband",
+    "Spirit angler top",
+    "Spirit angler waders",
+    "Spirit angler boots",
+    "Tome of water (empty)",
+    "Soaked page",
+    "Tackle box",
+    "Fish barrel",
+    "Dragon harpoon",
+    "Spirit flakes"
+  ],
+  "Thermonuclear smoke devil": [
+    "Pet smoke devil",
+    "Occult necklace",
+    "Smoke battlestaff",
+    "Dragon chainbody",
+    "Jar of smoke"
+  ],
+  "Vardorvis": [
+    "Butch",
+    "Executioner's axe head",
+    "Virtus mask",
+    "Virtus robe top",
+    "Virtus robe bottom",
+    "Ultor vestige",
+    "Blood quartz",
+    "Strangled tablet",
+    "Chromium ingot",
+    "Awakener's orb"
+  ],
+  "Venenatis and Spindel": [
+    "Venenatis spiderling",
+    "Treasonous ring",
+    "Dragon pickaxe",
+    "Dragon 2h sword",
+    "Fangs of venenatis",
+    "Voidwaker gem"
+  ],
+  "Vet'ion and Calvar'ion": [
+    "Vet'ion jr.",
+    "Ring of the gods",
+    "Dragon pickaxe",
+    "Dragon 2h sword",
+    "Skull of vet'ion",
+    "Voidwaker blade"
+  ],
+  "Vorkath": [
+    "Vorki",
+    "Vorkath's head",
+    "Draconic visage",
+    "Skeletal visage",
+    "Jar of decay",
+    "Dragonbone necklace"
+  ],
+  "The Whisperer": [
+    "Wisp",
+    "Siren's staff",
+    "Virtus mask",
+    "Virtus robe top",
+    "Virtus robe bottom",
+    "Bellator vestige",
+    "Shadow quartz",
+    "Sirenic tablet",
+    "Chromium ingot",
+    "Awakener's orb"
+  ],
+  "Wintertodt": [
+    "Phoenix",
+    "Tome of fire (empty)",
+    "Burnt page",
+    "Pyromancer garb",
+    "Pyromancer hood",
+    "Pyromancer robe",
+    "Pyromancer boots",
+    "Warm gloves",
+    "Bruma torch",
+    "Dragon axe"
+  ],
+  "Yama": [
+    "Yami",
+    "Chasm teleport scroll",
+    "Oathplate shards",
+    "Oathplate helm",
+    "Oathplate chest",
+    "Oathplate legs",
+    "Soulflame horn",
+    "Rite of vile transference",
+    "Forgotten lockbox",
+    "Dossier",
+    "Barrel of demonic tallow (full)"
+  ],
+  "Zalcano": [
+    "Smolcano",
+    "Crystal tool seed",
+    "Zalcano shard",
+    "Uncut onyx"
+  ],
+  "Zulrah": [
+    "Pet snakeling",
+    "Tanzanite mutagen",
+    "Magma mutagen",
+    "Jar of swamp",
+    "Magic fang",
+    "Serpentine visage",
+    "Tanzanite fang",
+    "Zul-andra teleport",
+    "Uncut onyx",
+    "Zulrah's scales"
+  ],
+  "Chambers of Xeric": [
+    "Olmlet",
+    "Metamorphic dust",
+    "Twisted bow",
+    "Elder maul",
+    "Kodai insignia",
+    "Dragon claws",
+    "Ancestral hat",
+    "Ancestral robe top",
+    "Ancestral robe bottom",
+    "Dinh's bulwark",
+    "Dexterous prayer scroll",
+    "Arcane prayer scroll",
+    "Dragon hunter crossbow",
+    "Twisted buckler",
+    "Torn prayer scroll",
+    "Dark relic",
+    "Onyx",
+    "Twisted ancestral colour kit",
+    "Xeric's guard",
+    "Xeric's warrior",
+    "Xeric's sentinel",
+    "Xeric's general",
+    "Xeric's champion"
+  ],
+  "Theatre of Blood": [
+    "Lil' zik",
+    "Scythe of vitur (uncharged)",
+    "Ghrazi rapier",
+    "Sanguinesti staff (uncharged)",
+    "Justiciar faceguard",
+    "Justiciar chestguard",
+    "Justiciar legguards",
+    "Avernic defender hilt",
+    "Vial of blood",
+    "Sinhaza shroud tier 1",
+    "Sinhaza shroud tier 2",
+    "Sinhaza shroud tier 3",
+    "Sinhaza shroud tier 4",
+    "Sinhaza shroud tier 5",
+    "Sanguine dust",
+    "Holy ornament kit",
+    "Sanguine ornament kit"
+  ],
+  "The Fractured Archive": [
+    "Orion",
+    "Archivist's folio (inert)",
+    "Horn of Bran",
+    "Zorya's tome (uncharged)",
+    "Rondache",
+    "Ascension crossbows",
+    "Obligator (uncharged)",
+    "Fragment of whispering wind",
+    "Fragment of deep water",
+    "Fragment of living earth",
+    "Fragment of burning fire",
+    "Living record (tier 1)",
+    "Living record (tier 2)",
+    "Living record (tier 3)",
+    "Living record (tier 4)",
+    "Living record (tier 5)",
+    "Ascension shards"
+  ],
+  "Tombs of Amascut": [
+    "Tumeken's guardian",
+    "Tumeken's shadow (uncharged)",
+    "Elidinis' ward",
+    "Masori mask",
+    "Masori body",
+    "Masori chaps",
+    "Lightbearer",
+    "Osmumten's fang",
+    "Thread of elidinis",
+    "Breach of the scarab",
+    "Eye of the corruptor",
+    "Jewel of the sun",
+    "Jewel of amascut",
+    "Menaphite ornament kit",
+    "Cursed phalanx",
+    "Masori crafting kit",
+    "Cache of runes",
+    "Icthlarin's shroud (tier 1)",
+    "Icthlarin's shroud (tier 2)",
+    "Icthlarin's shroud (tier 3)",
+    "Icthlarin's shroud (tier 4)",
+    "Icthlarin's shroud (tier 5)",
+    "Remnant of akkha",
+    "Remnant of ba-ba",
+    "Remnant of kephri",
+    "Remnant of zebak",
+    "Ancient remnant"
+  ]
+}</script>
+  <!-- Boss page, Wiki reference lookups and collection ownership. -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      "use strict";
+      const list = document.getElementById("boss-list"), dialog = document.getElementById("boss-dialog"), reference = document.getElementById("boss-reference"), itemDialog = document.getElementById("collection-item-dialog"); if (!list || !dialog || !reference || !itemDialog) return;
+      const collections = JSON.parse(document.getElementById("boss-collection-data").textContent), wiki = "https://oldschool.runescape.wiki", cache = new Map(), guideCache = new Map(), wikiPages = new Map(), queue = []; let running = 0, version = 0, artPromise = null, itemContext = null, itemRequest = 0; const key = s => String(s).toLowerCase().replace(/[^a-z0-9]/g, "");
+
+      const PROGRESS_PREFIX = "osrs-collection-log-v1:", MAX_QUANTITY = Number.MAX_SAFE_INTEGER;
+      function normalPlayer(v) { return String(v || "").replace(/_/g, " ").replace(/\s+/g, " ").trim().toLowerCase(); } function itemKey(v) { return String(v).replace(/\s+/g, " ").trim().toLowerCase(); } function progressKey(p) { return PROGRESS_PREFIX + encodeURIComponent(p); }
+      function validateQuantity(v) { if (typeof v !== "number" || !Number.isSafeInteger(v) || v < 0) throw new Error("Enter a whole-number quantity of 0 or more."); return v; } function parseQuantity(v) { const t = String(v).trim(); if (!/^\d+$/.test(t)) throw new Error("Enter a whole-number quantity of 0 or more."); return validateQuantity(Number(t)); } function quantityOf(s, n) { return s?.items[itemKey(n)]?.quantity || 0; }
+      function readProgress(profile) { if (!profile) throw new Error("No active player is selected."); const raw = localStorage.getItem(progressKey(profile)); if (raw === null) return { schema: 2, profile, items: Object.create(null) }; let v; try { v = JSON.parse(raw); } catch { throw new Error("Saved collection data could not be read. It has not been overwritten."); } if (![1, 2].includes(v?.schema) || v.profile !== profile || !v.items || typeof v.items !== "object" || Array.isArray(v.items)) throw new Error("Saved collection data has an unsupported format. It has not been overwritten."); const items = Object.create(null); for (const [n, e] of Object.entries(v.items)) { if (!e || typeof e !== "object" || Array.isArray(e)) throw new Error("Saved item data is invalid. It has not been overwritten."); const quantity = e.quantity === undefined && v.schema === 1 && typeof e.collectedAt === "string" ? 1 : validateQuantity(e.quantity); if (quantity > 0) { items[n] = { quantity }; if (typeof e.collectedAt === "string") items[n].collectedAt = e.collectedAt; if (typeof e.updatedAt === "string") items[n].updatedAt = e.updatedAt; } } return { schema: 2, profile, items }; }
+      function saveQuantity(profile, name, quantity) { validateQuantity(quantity); const s = readProgress(profile), id = itemKey(name), old = s.items[id], now = new Date().toISOString(); if (quantity > 0) s.items[id] = { quantity, collectedAt: old?.collectedAt || now, updatedAt: now }; else delete s.items[id]; localStorage.setItem(progressKey(profile), JSON.stringify(s)); return s; }
+
+      function activePlayer() { const q = new URLSearchParams(location.search).get("player"); if (q) return normalPlayer(q); try { const v = sessionStorage.getItem("osrs-active-profile-v1"); if (v) return normalPlayer(v); } catch { } try { return normalPlayer(localStorage.getItem("osrs-active-profile-v1")); } catch { return ""; } }
+      function snapshot(profile) { try { return { state: readProgress(profile), error: "" }; } catch (e) { return { state: null, error: e.message || "Collection storage is unavailable." }; } }
+      const groups = ["Combat info", "Slayer info", "Combat stats", "Aggressive stats", "Melee defence", "Magic defence", "Ranged defence", "Immunities"], groupAliases = { combatinfo: "Combat info", combatinformation: "Combat info", slayerinfo: "Slayer info", slayerinformation: "Slayer info", combatstats: "Combat stats", combatstatistics: "Combat stats", aggressivestats: "Aggressive stats", aggressivebonuses: "Aggressive stats", offensivebonuses: "Aggressive stats", attackbonuses: "Aggressive stats", meleedefence: "Melee defence", meleedefense: "Melee defence", magicdefence: "Magic defence", magicdefense: "Magic defence", rangeddefence: "Ranged defence", rangeddefense: "Ranged defence", immunities: "Immunities" };// Boss-specific collections. Keep item names unchanged so saved quantities survive.
+      Object.assign(collections, {
+        "Dagannoth Rex": [
+          "Pet dagannoth rex",
+          "Berserker ring",
+          "Warrior ring",
+          "Dragon axe"
+        ],
+        "Dagannoth Prime": [
+          "Pet dagannoth prime",
+          "Seers ring",
+          "Mud battlestaff",
+          "Dragon axe"
+        ],
+        "Dagannoth Supreme": [
+          "Pet dagannoth supreme",
+          "Archers ring",
+          "Seercull",
+          "Dragon axe"
+        ]
+      });
+      // Separate encounter variants without changing item names or saved quantities.
+      const nightmareShared = [...collections["The Nightmare"]];
+      const gauntletShared = [...collections["The Gauntlet"]];
+      const chambersShared = [...collections["Chambers of Xeric"]];
+
+      const phosaniOnly = new Set([
+        "Slepey tablet",
+        "Parasitic egg"
+      ]);
+
+      const challengeOnly = new Set([
+        "Metamorphic dust",
+        "Twisted ancestral colour kit",
+        "Xeric's guard",
+        "Xeric's warrior",
+        "Xeric's sentinel",
+        "Xeric's general",
+        "Xeric's champion"
+      ]);
+
+      Object.assign(collections, {
+        "The Nightmare": nightmareShared.filter(
+          item => !phosaniOnly.has(item)
+        ),
+        "Phosani's Nightmare": nightmareShared,
+
+        "The Gauntlet": gauntletShared.filter(
+          item => item !== "Gauntlet cape"
+        ),
+        "The Corrupted Gauntlet": gauntletShared,
+
+        "Chambers of Xeric": chambersShared.filter(
+          item => !challengeOnly.has(item)
+        ),
+        "Chambers of Xeric: Challenge Mode": chambersShared
+      });
+      // Keep full variant lists before filtering the normal-mode views.
+      const theatreShared = [...collections["Theatre of Blood"]];
+      const tombsShared = [...collections["Tombs of Amascut"]];
+
+      const hardTheatreOnly = new Set([
+        "Sanguine dust",
+        "Holy ornament kit",
+        "Sanguine ornament kit"
+      ]);
+
+      const expertTombsOnly = new Set([
+        "Masori crafting kit",
+        "Menaphite ornament kit",
+        "Cursed phalanx",
+        "Remnant of akkha",
+        "Remnant of ba-ba",
+        "Remnant of kephri",
+        "Remnant of zebak",
+        "Ancient remnant"
+      ]);
+
+      Object.assign(collections, {
+        "Theatre of Blood": theatreShared.filter(
+          item => !hardTheatreOnly.has(item)
+        ),
+        "Theatre of Blood: Hard Mode": theatreShared,
+
+        "Tombs of Amascut": tombsShared.filter(
+          item => !expertTombsOnly.has(item)
+        ),
+        "Tombs of Amascut: Expert Mode": tombsShared
+      });
+      const collectionIndex = new Map(Object.keys(collections).map(n => [key(n), n])); const logAliases = {
+        "Chambers of Xeric: Challenge Mode": "Chambers of Xeric: Challenge Mode", "Theatre of Blood: Hard Mode": "Theatre of Blood: Hard Mode", "Tombs of Amascut: Expert Mode": "Tombs of Amascut: Expert Mode", "The Corrupted Gauntlet": "The Corrupted Gauntlet", "Dagannoth Rex": "Dagannoth Rex",
+        "Dagannoth Prime": "Dagannoth Prime",
+        "Dagannoth Supreme": "Dagannoth Supreme", "Artio": "Callisto and Artio", "Callisto": "Callisto and Artio", "Spindel": "Venenatis and Spindel", "Venenatis": "Venenatis and Spindel", "Vetion": "Vet'ion and Calvar'ion", "Vet'ion": "Vet'ion and Calvar'ion", "Calvarion": "Vet'ion and Calvar'ion", "Calvar'ion": "Vet'ion and Calvar'ion", "Phosanis Nightmare": "Phosani's Nightmare", "Phosani's Nightmare": "Phosani's Nightmare", "Nightmare": "The Nightmare", "TzTok-Jad": "The Fight Caves", "TzKal-Zuk": "The Inferno", "Sol Heredit": "Fortis Colosseum", "Lunar Chests": "Moons of Peril", "Lunar Chest": "Moons of Peril", "Hueycoatl": "The Hueycoatl", "Leviathan": "The Leviathan", "Whisperer": "The Whisperer", "Fractured Archive": "The Fractured Archive", "The Fractured Archives": "The Fractured Archive"
+      }; const logAliasIndex = new Map(Object.entries(logAliases).map(([n, t]) => [key(n), t])); function collectionFor(n) { return logAliasIndex.get(key(n)) || collectionIndex.get(key(n)) || null; }
+      const pageAliases = { "Kril Tsutsaroth": "K'ril Tsutsaroth", "Doom Of Mokhaiotl": "Doom of Mokhaiotl", "Chambers of Xeric: Challenge Mode": "Chambers of Xeric", "Theatre of Blood: Hard Mode": "Theatre of Blood", "Tombs of Amascut: Expert Mode": "Tombs of Amascut", "The Corrupted Gauntlet": "The Gauntlet", "Barrows Chests": "Barrows", "Lunar Chests": "Lunar Chest", "Kree Arra": "Kree'arra", "Phosanis Nightmare": "Phosani's Nightmare", "Vetion": "Vet'ion", "Calvarion": "Calvar'ion" }; const pageAliasIndex = new Map(Object.entries(pageAliases).map(([n, t]) => [key(n), t])); function pageFor(n) { return pageAliasIndex.get(key(n)) || collectionIndex.get(key(n)) || n; }
+      function node(t, c, v) { const n = document.createElement(t); n.className = c; if (v !== undefined) n.textContent = v; return n; } function clean(n) { return (n?.textContent || "").replace(/\s+/g, " ").replace(/\[edit\]/gi, "").trim(); } function source(t) { return wiki + "/w/" + encodeURIComponent(t.replace(/ /g, "_")); } function safeURL(v, b = wiki) { if (!v) return ""; try { const u = new URL(v, b); return /^(https?:)$/.test(u.protocol) ? u.href : ""; } catch { return ""; } } function imageURL(v) { const u = safeURL(v); return u && new URL(u).protocol === "https:" && new URL(u).hostname === "oldschool.runescape.wiki" ? u : ""; }
+      function link(t, u, c = "source-link") { const n = node("a", c, t); n.href = u; n.target = "_blank"; n.rel = "noopener noreferrer"; return n; } function picture(u, a) { const n = node("img", ""); n.src = u; n.alt = a; n.loading = "lazy"; n.decoding = "async"; n.addEventListener("error", () => { n.hidden = true; }, { once: true }); return n; }
+      function pump() { while (running < 2 && queue.length) { running++; const j = queue.shift(); j.run().then(j.resolve, j.reject).finally(() => { running--; pump(); }); } } function schedule(run) { return new Promise((resolve, reject) => { queue.push({ run, resolve, reject }); pump(); }); }
+      async function fetchPageNetwork(title) { const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 20000); try { const url = new URL("/api.php", wiki); url.search = new URLSearchParams({ action: "parse", page: title, prop: "text", redirects: "1", format: "json", origin: "*", disableeditsection: "1" }); const r = await fetch(url, { signal: controller.signal }); if (!r.ok) throw new Error("Wiki HTTP " + r.status); const p = await r.json(), html = typeof p.parse?.text === "string" ? p.parse.text : p.parse?.text?.["*"]; if (p.error || !html) throw new Error("Wiki page unavailable"); return { title: p.parse.title || title, doc: new DOMParser().parseFromString(html, "text/html") }; } finally { clearTimeout(timer); } }
+      function fetchPage(title, force = false) { const id = String(title); if (force) wikiPages.delete(id); if (!wikiPages.has(id)) { if (wikiPages.size >= 32) wikiPages.delete(wikiPages.keys().next().value); const p = fetchPageNetwork(title); wikiPages.set(id, p); p.catch(() => { if (wikiPages.get(id) === p) wikiPages.delete(id); }); } return wikiPages.get(id); }
+      function copyWiki(o, parent, base, preserveHidden = false) {
+        if (o.nodeType === 3) { parent.append(document.createTextNode(o.nodeValue)); return; } if (o.nodeType !== 1) return; const tag = o.tagName.toLowerCase(); if (["script", "style", "iframe", "object", "embed", "form", "input", "button", "select", "textarea", "noscript", "meta", "link"].includes(tag)) return; if (o.matches(".mw-editsection,.navbox,.metadata,.noprint,.toc,#toc,.reflist,.references,.mw-references-wrap,.printfooter,.catlinks")) return; if (preserveHidden && (o.hidden || /display\s*:\s*none/i.test(o.getAttribute("style") || "") || o.classList.contains("infobox-switch-hidden"))) return;
+        const allowed = new Set(["p", "div", "span", "a", "img", "table", "thead", "tbody", "tfoot", "tr", "th", "td", "caption", "ul", "ol", "li", "dl", "dt", "dd", "strong", "b", "em", "i", "u", "small", "sup", "sub", "br", "hr", "h2", "h3", "h4", "h5", "h6", "blockquote", "pre", "code", "figure", "figcaption"]); if (!allowed.has(tag)) { for (const c of o.childNodes) copyWiki(c, parent, base, preserveHidden); return; } let target;
+        if (tag === "img") { const url = imageURL(o.getAttribute("src") || o.getAttribute("data-src")); if (!url) { const alt = o.getAttribute("alt"); if (alt) parent.append(document.createTextNode(alt)); return; } target = picture(url, o.getAttribute("alt") || o.getAttribute("title") || ""); for (const a of ["width", "height"]) { const v = Number(o.getAttribute(a)); if (v > 0 && v <= 2048) target.setAttribute(a, String(v)); } }
+        else { target = document.createElement(tag); if (tag === "a") { const url = safeURL(o.getAttribute("href"), base); if (url) { target.href = url; target.target = "_blank"; target.rel = "noopener noreferrer"; } } for (const a of ["colspan", "rowspan"]) { const v = Number(o.getAttribute(a)); if (v > 1 && v <= 50) target.setAttribute(a, String(v)); } const title = o.getAttribute("title"); if (title) target.title = title; const panel = o.getAttribute("data-title") || (o.classList.contains("tabbertab") ? title : ""); if (panel) target.append(node("h5", "boss-guide-tab-title", panel)); for (const c of o.childNodes) copyWiki(c, target, base, preserveHidden); } if (tag === "table") { const scroll = node("div", "boss-wiki-scroll"); scroll.append(target); parent.append(scroll); } else parent.append(target);
+      }
+      function strategyTitle(root, title) { const candidates = []; for (const a of root.querySelectorAll("a[href]")) { const url = safeURL(a.getAttribute("href")); if (!url) continue; const u = new URL(url); if (u.hostname !== "oldschool.runescape.wiki" || !u.pathname.startsWith("/w/")) continue; let t; try { t = decodeURIComponent(u.pathname.slice(3)).replace(/_/g, " "); } catch { continue; } if (!/\/Strategies$/i.test(t)) continue; if (key(t.replace(/\/Strategies$/i, "")) === key(title)) return t; if (a.closest(".hatnote,.dablink,.rellink")) candidates.push(t); } return candidates[0] || null; }
+      function parseBoss(p) { const root = p.doc.querySelector(".mw-parser-output") || p.doc.body, box = root.querySelector(".infobox-monster") || root.querySelector("table.infobox"), portrait = box?.querySelector(".infobox-image img,.infobox-image-wrapper img") || box?.querySelector("img"), sections = Object.fromEntries(groups.map(n => [n, []])); let current = null; if (box) for (const row of box.querySelectorAll("tr")) { if ([...row.children].some(c => c.querySelector("table"))) continue; const cells = [...row.children].filter(c => /^(TH|TD)$/.test(c.tagName)); if (!cells.length) continue; const label = groupAliases[key(clean(cells[0]))] || groupAliases[key(clean(row))]; if (label) { current = label; continue; } if (cells.length === 1 && cells[0].tagName === "TH" && Number(cells[0].getAttribute("colspan")) > 1) { current = null; continue; } if (current) sections[current].push(row); } return { title: p.title, url: source(p.title), image: imageURL(portrait?.getAttribute("src")), sections, strategy: strategyTitle(root, p.title) }; }
+      function loadBoss(name, retry = false) { const t = pageFor(name); if (retry) cache.delete(t); if (!cache.has(t)) { const p = schedule(async () => parseBoss(await fetchPage(t, retry))); cache.set(t, p); p.catch(() => { if (cache.get(t) === p) cache.delete(t); }); } return cache.get(t); } function loadGuide(t, retry = false) { if (retry) guideCache.delete(t); if (!guideCache.has(t)) { const p = schedule(() => fetchPage(t, retry)); guideCache.set(t, p); p.catch(() => { if (guideCache.get(t) === p) guideCache.delete(t); }); } return guideCache.get(t); }
+      function collectionArt() { if (!artPromise) { artPromise = fetchPage("Collection log").then(({ doc }) => { const map = new Map(); for (const td of doc.querySelectorAll("td")) { const url = imageURL(td.querySelector("img")?.getAttribute("src")); if (!url) continue; for (const a of td.querySelectorAll('a[href^="/w/"]')) { const text = clean(a), title = a.getAttribute("title"); if (text) map.set(key(text), url); if (title) map.set(key(title), url); } } return map; }); artPromise.catch(() => { artPromise = null; }); } return artPromise; }
+
+      // Wiki-listed reference rates are independent of calculator overrides and collection ownership.
+
+      function rateName(value) { return String(value || "").toLowerCase().replace(/^the\s+/, "").replace(/[^a-z0-9]/g, ""); }
+      function rateSources(boss) {
+        const aliases = {
+          obor: [
+            "Obor",
+            "Chest (Obor's lair)"
+          ],
+          bryophyta: [
+            "Bryophyta",
+            "Bryophyta Members",
+            "Bryophyta F2P",
+            "Chest (Bryophyta's lair)"
+          ], tztokjad: ["TzTok-Jad", "Fight Caves"], tzkalzuk: ["TzKal-Zuk", "Inferno"], solheredit:[
+  "Sol Heredit",
+  "Fortis Colosseum",
+  "Rewards Chest (Fortis Colosseum)",
+  ...Array.from(
+    {length:12},
+    (_,index)=>
+      "Rewards Chest (Fortis Colosseum) Wave "+(index+1)
+  )
+], barrowschests: ["Barrows Chests", "Barrows chest", "Chest (Barrows)"], lunarchests: ["Lunar Chest", "Moons of Peril"], gauntlet: ["The Gauntlet", "Crystalline Hunllef"], corruptedgauntlet: ["The Corrupted Gauntlet", "Corrupted Gauntlet", "Corrupted Hunllef"]
+        };
+        return new Set([boss, ...(aliases[rateName(boss)] || [])].map(rateName));
+      }
+      function fixedListedRate(text) {
+        const t = String(text).trim().replace(/,/g, ""); if (/^(always|guaranteed)$/i.test(t)) return { value: 1, input: "1/1" };
+        let m = t.match(/^(\d+(?:\.\d+)?|\.\d+)\s*\/\s*(\d+(?:\.\d+)?|\.\d+)$/), p, input;
+        if (m) { p = Number(m[1]) / Number(m[2]); input = m[1] + "/" + m[2]; }
+        else if ((m = t.match(/^(\d+(?:\.\d+)?|\.\d+)\s*%$/))) { p = Number(m[1]) / 100; input = m[1] + "%"; }
+        else return null;
+        return Number.isFinite(p) && p > 0 && p <= 1 ? { value: p, input } : null;
+      }
+      function complexRateContext(boss, item) { return /chambers|theatre|tombs|barrows|gauntlet|tempoross|wintertodt|zalcano|mokhaiotl|colosseum|solheredit|tztokjad|tzkalzuk|lunarchest|moonsofperil|dukesucellus|vardorvis|leviathan|whisperer/.test(rateName(boss)) || /vestige/.test(rateName(item)); }
+      function conditionalRateText(text) { return /\b(varies|variable|conditional|depending|depends|raid level|invocation|reward points|personal points|raid points|delve|threshold|bad.luck|mitigation|dryness protection|rare drop table|chance to roll|after .* kills|invisible roll|invisible drop|increased drop rate)\b/i.test(text); }
+      function classifyListedRates(rows, boss, item) {
+        const unique = [...new Map(rows.map(r => [JSON.stringify([r.source, r.rate, r.quantity, r.notes]), r])).values()];
+        const row = unique[0], fixed = unique.length === 1 ? fixedListedRate(row.rate) : null;
+        const complex = complexRateContext(boss, item);
+        const auto = fixed && !row.uncertain && !row.notes.length && !complex ? fixed.input : null;
+        return { rows: unique, auto, probability: auto ? fixed.value : null, conditional: unique.length > 1 || !fixed || !!row?.uncertain || !!row?.notes.length || complex };
+      }
+
+      function plainRateCell(cell) { if (!cell) return ""; const clone = cell.cloneNode(true); clone.querySelectorAll("sup,.mw-editsection,script,style").forEach(n => n.remove()); return clean(clone); }
+      function surroundingRateNotes(table) {
+        const notes = []; let node = table.previousElementSibling, steps = 0;
+        while (node && steps++ < 4) { if (node.matches("h2,h3,h4,.mw-heading")) { if (conditionalRateText(clean(node))) notes.push(clean(node)); break; } if (node.matches("p") && conditionalRateText(clean(node))) notes.push(clean(node).slice(0, 1400)); node = node.previousElementSibling; } return notes;
+      }
+      function referencedRateNotes(row, doc) {
+        const notes = [];
+        for (const a of row.querySelectorAll('sup a[href*="#"],a.reference[href*="#"]')) {
+          const href = a.getAttribute("href"), fragment = href?.slice(href.indexOf("#") + 1); if (!fragment) continue;
+          let target; try { target = doc.getElementById(decodeURIComponent(fragment)); } catch { }
+          if (target) { const value = clean(target.querySelector(".reference-text") || target); if (value) notes.push(value.slice(0, 1600)); }
+        }
+        return [...new Set(notes)];
+      }
+      function introRateWarning(root) { let intro = ""; for (const n of root.children) { if (n.matches("h2,.mw-heading2") || n.matches(".mw-heading") && n.querySelector("h2")) break; if (n.matches("p")) intro += " " + clean(n); } return conditionalRateText(intro); }
+      function theatreTableMode(table){
+  let anchor=table;
+
+  for(
+    let depth=0;
+    anchor&&depth<4;
+    depth++,anchor=anchor.parentElement
+  ){
+    let previous=anchor.previousElementSibling;
+
+    for(
+      let steps=0;
+      previous&&steps<30;
+      steps++,previous=previous.previousElementSibling
+    ){
+      const heading=previous.matches("h2,h3,h4,h5,h6")
+        ?previous
+        :previous.matches(".mw-heading")
+          ?previous.querySelector("h2,h3,h4,h5,h6")
+          :null;
+
+      if(!heading)continue;
+
+      const title=clean(heading);
+
+      if(/^normal mode$/i.test(title))return "normal";
+      if(/^hard mode$/i.test(title))return "hard";
+      if(/^entry mode$/i.test(title))return "entry";
+
+      // Common and tertiary sections are handled separately.
+      return "shared";
+    }
+
+    if(anchor.matches?.(".mw-parser-output"))break;
+  }
+
+  return "shared";
+}
+
+function theatreListedRate(rate,boss,item){
+  const mode=rateName(boss);
+
+  if(
+    !["theatreofblood","theatreofbloodhardmode"].includes(mode) ||
+    rateName(item)!=="lilzik"
+  ){
+    return rate;
+  }
+
+  // The chest's combined pet entry lists Normal first, then Hard.
+  const pair=String(rate).match(
+    /^\s*(\d+(?:\.\d+)?\s*\/\s*\d+(?:\.\d+)?)\s*;\s*(\d+(?:\.\d+)?\s*\/\s*\d+(?:\.\d+)?)\s*$/
+  );
+
+  return pair
+    ?pair[mode==="theatreofbloodhardmode"?2:1]
+    :rate;
+}
+      function readRateTables(payload, boss, item, sourceMode) {
+        const root =
+          payload.doc.querySelector(".mw-parser-output") ||
+          payload.doc.body;
+
+        const expected = rateSources(boss);
+        const records = [];
+        const introConditional = introRateWarning(root);
+
+const theatre = [
+  "theatreofblood",
+  "theatreofbloodhardmode"
+].includes(rateName(boss));
+
+for (const table of root.querySelectorAll("table")) {
+  const tableMode = theatre
+    ? theatreTableMode(table)
+    : "shared";
+
+  if (theatre) {
+    const wantedMode =
+      rateName(boss) === "theatreofbloodhardmode"
+        ? "hard"
+        : "normal";
+
+    if (tableMode === "entry") continue;
+
+    if (
+      tableMode !== "shared" &&
+      tableMode !== wantedMode
+    ) {
+      continue;
+    }
+  }
+
+          const rows = [...table.querySelectorAll("tr")]
+            .filter(row => row.closest("table") === table);
+
+          if (rows.length > 3000) continue;
+
+          // Expand merged cells into their logical table positions.
+          const grid = [];
+          let malformed = false;
+
+          for (let y = 0; y < rows.length; y++) {
+            grid[y] ||= [];
+            let x = 0;
+
+            const physicalCells = [...rows[y].children]
+              .filter(cell => /^(TH|TD)$/.test(cell.tagName));
+
+            for (const cell of physicalCells) {
+              while (grid[y][x]) x++;
+
+              const width = Math.max(
+                1,
+                Number(cell.getAttribute("colspan")) || 1
+              );
+
+              const rawHeight = cell.getAttribute("rowspan");
+              const height = rawHeight === "0"
+                ? rows.length - y
+                : Math.max(1, Number(rawHeight) || 1);
+
+              if (
+                !Number.isInteger(width) ||
+                !Number.isInteger(height) ||
+                x + width > 80 ||
+                height > 3000
+              ) {
+                malformed = true;
+                break;
+              }
+
+              for (let dy = 0; dy < height && y + dy < rows.length; dy++) {
+                grid[y + dy] ||= [];
+
+                for (let dx = 0; dx < width; dx++) {
+                  if (grid[y + dy][x + dx]) {
+                    malformed = true;
+                    break;
+                  }
+
+                  grid[y + dy][x + dx] = cell;
+                }
+
+                if (malformed) break;
+              }
+
+              if (malformed) break;
+              x += width;
+            }
+
+            if (malformed) break;
+          }
+
+          if (malformed) continue;
+
+          let header = null;
+          let start = -1;
+
+          for (let y = 0; y < rows.length; y++) {
+            const labels = (grid[y] || []).map(plainRateCell);
+            const matches = [];
+            const rates = [];
+
+            labels.forEach((label, index) => {
+              const isMatchColumn = sourceMode
+                ? /^Source$/i.test(label)
+                : /^Item$/i.test(label);
+
+              if (isMatchColumn) matches.push(index);
+
+              if (/^(Rarity|Drop rate|Drop chance)$/i.test(label)) {
+                rates.push(index);
+              }
+            });
+
+            if (matches.length && rates.length) {
+              header = {
+                matches,
+                rates,
+                quantity: labels.findIndex(label =>
+                  /^Quantity$/i.test(label)
+                )
+              };
+
+              start = y;
+              break;
+            }
+          }
+
+          if (!header) continue;
+
+          const context = surroundingRateNotes(table);
+
+          for (let y = start + 1; y < rows.length; y++) {
+            const cells = grid[y] || [];
+
+            const candidates = [...new Set(
+              header.matches
+                .map(index => cells[index])
+                .filter(Boolean)
+            )];
+
+            const matched = candidates.find(cell => {
+              const names = [
+                plainRateCell(cell),
+                ...[...cell.querySelectorAll("a[title]")]
+                  .map(anchor => anchor.getAttribute("title")),
+                ...[...cell.querySelectorAll("img[alt]")]
+                  .map(image => image.getAttribute("alt"))
+              ];
+
+              return sourceMode
+                ? names.some(name => expected.has(rateName(name)))
+                : names.some(name =>
+                  rateName(name) === rateName(item)
+                );
+            });
+
+            if (!matched) continue;
+
+            const rateCells = [...new Set(
+              header.rates
+                .map(index => cells[index])
+                .filter(Boolean)
+            )];
+
+            for (const rarity of rateCells) {
+              // A full-width note is not a separate drop-rate entry.
+              if (rarity === matched) continue;
+
+              const rate=theatreListedRate(
+  plainRateCell(rarity),
+  boss,
+  item
+);
+              if (!rate) continue;
+
+              const inherited = [...new Set(cells.filter(Boolean))];
+
+              const refs = [
+                ...referencedRateNotes(rows[y], payload.doc),
+                ...inherited.flatMap(cell =>
+                  referencedRateNotes(cell, payload.doc)
+                )
+              ];
+
+              const notes = [...new Set([...refs, ...context])];
+              if(theatre){
+  const modeLabel=rateName(boss)==="theatreofbloodhardmode"
+    ?"Hard Mode"
+    :"Normal Mode";
+
+  notes.push("Opened encounter: Theatre of Blood — "+modeLabel+".");
+
+  if(tableMode==="normal"||tableMode==="hard"){
+    notes.push(
+      "This fraction is the item's share of the selected mode's " +
+      "unique table, conditional on a unique reward being awarded. " +
+      "It is not your personal chance per raid."
+    );
+
+    notes.push(
+      "The chance of a team unique and which player receives it " +
+      "depend on the raid's reward rules, deaths and contribution."
+    );
+  }
+
+  if(rateName(item)==="lilzik"){
+    notes.push(
+      "The displayed pet fraction is selected for the opened mode."
+    );
+  }
+
+  if([
+    "holyornamentkit".replace(/ /g,""),
+    "sanguineornamentkit",
+    "sanguinedust"
+  ].includes(rateName(item))){
+    notes.push(
+      "This reward requires Hard Mode completion within the " +
+      "team-size-dependent target time."
+    );
+  }
+}
+              if(
+  ["barrows","barrowschest","barrowschests"].includes(
+    rateName(boss)
+  )
+){
+  notes.push(
+    "Barrows equipment eligibility and chances depend on which " +
+    "brothers were defeated. You must defeat the corresponding " +
+    "brother to receive his equipment."
+  );
+
+  notes.push(
+    "The chest can make multiple reward rolls. A listed expression " +
+    "such as 7 × 1/2,448 must not be treated as one simple " +
+    "independent drop chance per chest."
+  );
+
+  notes.push(
+    "The Wiki table assumes all six brothers were defeated and " +
+    "full reward potential. Reward potential affects standard " +
+    "loot, but does not increase the Barrows equipment chance."
+  );
+}
+
+if(
+  ["lunarchest","lunarchests","moonsofperil"].includes(
+    rateName(boss)
+  )
+){
+  notes.push(
+    "You must defeat the corresponding Moon to roll for its " +
+    "equipment. Each defeated Moon gives an independent 1/56 " +
+    "chance of a unique from that Moon's set."
+  );
+
+  notes.push(
+    "The listed 1/224 equipment rates do not account for duplicate " +
+    "protection. When a unique is rolled, a piece not yet obtained " +
+    "from that set is selected, so the chance of a specific " +
+    "missing piece changes as the set is completed."
+  );
+
+  notes.push(
+    "Standard loot is only rolled when no unique is received. " +
+    "The number of standard-loot rolls depends on how many " +
+    "Moons were defeated."
+  );
+}
+              if(
+  rateName(boss)==="solheredit" ||
+  rateName(boss)==="fortiscolosseum"
+){
+  notes.push(
+    "Fortis Colosseum rewards depend on the wave. " +
+    "A listed wave-specific fraction applies to that wave's " +
+    "reward selection—not to every Sol Heredit kill. " +
+    "Check the source label and linked reward rules."
+  );
+}
+              if (
+                rateName(boss) === "chambersofxeric" ||
+                rateName(boss) === "chambersofxericchallengemode"
+              ) {
+                notes.push(
+                  "Chambers rewards depend on raid points and reward-table rules. " +
+                  "Fractions in the unique table are conditional on receiving a " +
+                  "unique reward—not the chance per raid. Pet, common and tertiary " +
+                  "rewards use their own conditions; check the linked source."
+                );
+              }
+
+              const differentPage =
+                !sourceMode &&
+                !expected.has(rateName(payload.title));
+
+              if (differentPage) {
+                notes.push(
+                  "This is a shared or differently named reference page. " +
+                  "Confirm the opened encounter and mode before using its rate."
+                );
+              }
+
+              if (introConditional) {
+                notes.push(
+                  "This Wiki page describes conditional or changing drop " +
+                  "mechanics; verify the source conditions."
+                );
+              }
+
+              if (rateCells.length > 1) {
+                notes.push(
+                  "The source table lists multiple rate columns. Check their " +
+                  "mode or condition headings before using a rate."
+                );
+              }
+
+              const uncertain =
+                inherited.some(cell => cell.querySelector("sup,.reference")) ||
+                introConditional ||
+                context.length > 0 ||
+                differentPage ||
+                rateCells.length > 1;
+
+              records.push({
+                source: sourceMode
+                  ? plainRateCell(matched) || boss
+                  : payload.title,
+                rate,
+                quantity: header.quantity >= 0
+                  ? plainRateCell(cells[header.quantity])
+                  : "",
+                notes,
+                uncertain,
+                url: source(payload.title)
+              });
+            }
+          }
+        }
+
+        return records;
+      }
+      function rateBossPage(boss){
+  const encounter=rateName(boss);
+
+  const rewardPages={
+    obor:"Chest (Obor's lair)",
+    bryophyta:"Chest (Bryophyta's lair)",
+
+    chambersofxeric:"Ancient chest",
+    chambersofxericchallengemode:"Ancient chest",
+
+    theatreofblood:"Monumental chest",
+    theatreofbloodhardmode:"Monumental chest",
+
+    solheredit:"Rewards Chest (Fortis Colosseum)",
+    fortiscolosseum:"Rewards Chest (Fortis Colosseum)",
+
+    barrows:"Chest (Barrows)",
+    barrowschest:"Chest (Barrows)",
+    barrowschests:"Chest (Barrows)",
+
+    lunarchest:"Lunar Chest",
+    lunarchests:"Lunar Chest",
+    moonsofperil:"Lunar Chest"
+
+    
+  };
+
+  if(
+    Object.prototype.hasOwnProperty.call(
+      rewardPages,
+      encounter
+    )
+  ){
+    return rewardPages[encounter];
+  }
+
+  const special={
+    "Tombs of Amascut: Expert Mode":"Tombs of Amascut"
+  };
+
+  return special[boss]||pageFor(boss);
+}
+      function rateCurrent(request) { return itemDialog.open && request === itemRequest && !!itemContext; }
+      function resetDropRate() { const root = document.getElementById("collection-item-drop-rate"); root.replaceChildren(node("span", "collection-rate-label", "Drop rate"), node("p", "collection-rate-value", "Loading Wiki rate…")); }
+      function completionReward(name, boss) {
+        const item = rateName(name);
+        const encounter = rateName(boss);
+        const thresholds = [100, 500, 1000, 1500, 2000];
+
+        const xericNames = [
+          "Xeric's guard",
+          "Xeric's warrior",
+          "Xeric's sentinel",
+          "Xeric's general",
+          "Xeric's champion"
+        ];
+
+        const xericTier = xericNames.findIndex(
+          value => rateName(value) === item
+        );
+
+        if (
+          xericTier >= 0 &&
+          encounter === "chambersofxericchallengemode"
+        ) {
+          return {
+            requirement:
+              thresholds[xericTier].toLocaleString("en-US") +
+              " Challenge Mode completions",
+            claim: "Claim from Captain Rimor.",
+            page: name
+          };
+        }
+
+        let match = item.match(/^sinhazashroudtier([1-5])$/);
+
+        if (
+          match &&
+          ["theatreofblood", "theatreofbloodhardmode"].includes(encounter)
+        ) {
+          return {
+            requirement:
+              thresholds[Number(match[1]) - 1].toLocaleString("en-US") +
+              " combined Normal/Hard Mode completions",
+            claim:
+              "Claim from the Mysterious Stranger outside the Theatre " +
+              "of Blood. Entry Mode does not count.",
+            page: name
+          };
+        }
+
+        match = item.match(/^icthlarinsshroudtier([1-5])$/);
+
+        if (
+          match &&
+          ["tombsofamascut", "tombsofamascutexpertmode"].includes(encounter)
+        ) {
+          return {
+            requirement:
+              thresholds[Number(match[1]) - 1].toLocaleString("en-US") +
+              " combined Normal/Expert Mode completions",
+            claim:
+              "Search the reward chest in the Tombs of Amascut main " +
+              "lobby. Entry Mode does not count.",
+            page: name
+          };
+        }
+
+        if (
+          item === "gauntletcape" &&
+          encounter === "corruptedgauntlet"
+        ) {
+          return {
+            requirement: "Complete the Corrupted Gauntlet",
+            claim:
+              "Automatically appears in your inventory when eligible. " +
+              "You do not receive another if one is already in your " +
+              "bank or cape rack.",
+            page: "Gauntlet cape"
+          };
+        }
+        if(
+  ["dizanasquiver","dizanasquiveruncharged"].includes(item) &&
+  ["solheredit","fortiscolosseum"].includes(encounter)
+){
+  return {
+    requirement: "Complete wave 12 and defeat Sol Heredit",
+    claim:
+      "Dizana's quiver is guaranteed from the Fortis " +
+      "Colosseum rewards chest after a full completion.",
+    page: "Dizana's quiver"
+  };
+}
+
+        return null;
+      }
+      async function showDropRate(name, boss, profile, request, force = false) {
+        if (request !== itemRequest) return;
+
+        resetDropRate();
+
+        const root = document.getElementById("collection-item-drop-rate");
+        const drySection = document.getElementById("dry-section");
+        const reward = completionReward(name, boss);
+
+        // Restore the calculator when switching back to a random-drop item.
+        if (drySection) drySection.hidden = !!reward;
+
+        root.setAttribute(
+          "aria-label",
+          reward ? "Unlock requirement" : "Wiki drop rate"
+        );
+
+        if (reward) {
+          root.replaceChildren(
+            node("span", "collection-rate-label", "Unlock requirement"),
+            node("p", "collection-rate-value", reward.requirement),
+            node("p", "collection-rate-note", reward.claim),
+            node(
+              "p",
+              "collection-rate-note",
+              "Completion reward—not a random drop."
+            ),
+            link("View Wiki source", source(reward.page))
+          );
+
+          itemDialog.dispatchEvent(
+            new CustomEvent("collection:wiki-rate", {
+              detail: {
+                item: name,
+                boss,
+                profile,
+                input: null
+              }
+            })
+          );
+
+          return;
+        }
+
+        let itemPage = null, bossPage = null, itemError = false, bossError = false, rows = [];
+        try{
+  const theatre=[
+    "theatreofblood",
+    "theatreofbloodhardmode"
+  ].includes(rateName(boss));
+
+  if(theatre){
+    bossPage=await fetchPage("Monumental chest",force);
+    rows=readRateTables(bossPage,boss,name,false);
+  }else{
+    itemPage=await fetchPage(name,force);
+    rows=readRateTables(itemPage,boss,name,true);
+  }
+}catch{
+  itemError=true;
+}
+        if (!rateCurrent(request)) return;
+        if (!rows.length) { try { bossPage = await fetchPage(rateBossPage(boss), force); rows = readRateTables(bossPage, boss, name, false); } catch { bossError = true; } }
+        if (!rateCurrent(request)) return;
+        root.replaceChildren(node("span", "collection-rate-label", "Drop rate"));
+        if (!rows.length) {
+          root.append(node("p", "collection-rate-value", itemError && bossError ? "Unable to load Wiki rate" : "No matching rate found"), node("p", "collection-rate-note", "No unambiguous drop-table entry was matched for " + name + " from " + boss + ". The item may belong to another boss in this shared log, use a reward page, or have special unlock conditions."));
+          const retry = node("button", "secondary-button collection-rate-retry", "Retry rate lookup"); retry.type = "button"; retry.addEventListener("click", () => showDropRate(name, boss, profile, request, true)); root.append(retry, link("Check item source", source(itemPage?.title || name)), link("Check encounter source", source(bossPage?.title || rateBossPage(boss)))); return;
+        }
+        const result = classifyListedRates(rows, boss, name);
+        const listedRates=[
+  ...new Set(result.rows.map(row=>row.rate))
+];
+
+const value=listedRates.length===1
+  ? listedRates[0]
+  : "Multiple listed rates"; root.append(node("p", "collection-rate-value", value));
+        if (result.probability !== null) root.append(node("p", "collection-rate-note", "Approximately " + (100 * result.probability).toLocaleString("en-US", { maximumFractionDigits: 6 }) + "% per eligible roll."));
+        if (result.conditional) root.append(node("p", "collection-rate-note", "Listed rate / conditions to verify. Not automatically applied to the calculator."));
+        for (const row of result.rows.slice(0, 12)) {
+          const entry = node("div", "collection-rate-entry"); entry.append(node("p", "collection-rate-note", (result.rows.length > 1 ? row.rate + " — " : "") + "Source: " + row.source + (row.quantity ? " · Quantity per drop: " + row.quantity : "")));
+          for (const text of row.notes) entry.append(node("p", "collection-rate-note", text)); entry.append(link("Wiki rate source", row.url)); root.append(entry);
+        }
+        if (result.rows.length > 12) root.append(node("p", "collection-rate-note", "More source entries are available on the linked Wiki page."));
+        if (result.auto) { const use = node("button", "secondary-button collection-rate-retry", "Use Wiki rate in calculator"); use.type = "button"; use.addEventListener("click", () => { const input = document.getElementById("dry-rate"); input.value = result.auto; input.dispatchEvent(new Event("input", { bubbles: true })); document.getElementById("dry-section").open = true; }); root.append(use); }
+        itemDialog.dispatchEvent(new CustomEvent("collection:wiki-rate", { detail: { item: name, boss, profile, input: result.auto } }));
+      }
+
+      function hydrate(card) { const n = card.querySelector(".boss-name")?.textContent; if (!n || !card.isConnected) return; loadBoss(n).then(d => { if (!card.isConnected) return; const art = card.querySelector(".boss-art"); art.replaceChildren(); if (d.image) art.append(picture(d.image, "")); else art.textContent = "Image unavailable"; }).catch(() => { if (card.isConnected) card.querySelector(".boss-art").textContent = "Image unavailable"; }); }
+      const viewport = "IntersectionObserver" in window ? new IntersectionObserver(entries => { for (const e of entries) if (e.isIntersecting) { viewport.unobserve(e.target); hydrate(e.target); } }, { rootMargin: "120px" }) : null; function renderCards() { for (const card of list.querySelectorAll(".boss-card:not([data-boss-details])")) { card.dataset.bossDetails = "true"; const art = node("span", "boss-art", "Loading image…"); art.setAttribute("aria-hidden", "true"); card.prepend(art); if (viewport) viewport.observe(card); else hydrate(card); } } new MutationObserver(renderCards).observe(list, { childList: true }); renderCards();
+      function section(parent, title) { const w = node("section", "boss-reference-section"); w.append(node("h3", "section-label", title)); parent.append(w); return w; } function accordion(parent, title, open = false) { const w = node("details", "boss-detail-group"); w.open = open; w.append(node("summary", "", title)); const b = node("div", "boss-group-body"); w.append(b); parent.append(w); return b; }
+      function isRaidEncounter(name) { return /chambers of xeric|theatre of blood|tombs of amascut|fractured archive/i.test(String(name || "")); }
+      function renderStats(parent, d, encounterName = "") { if (isRaidEncounter(encounterName)) return; parent.append(node("p", "boss-reference-note", "Infobox data uses the Wiki's default/base view. Phase, delve level, group size and encounter variants can change values. Open the source to select another Wiki variant.")); for (const n of groups) { const body = accordion(parent, n, n === "Combat info"), rows = d.sections[n]; if (!rows.length) { body.append(node("p", "wiki-intro", "Not provided in this page's boss infobox. Activity and raid overview pages may list stats on individual boss pages.")); continue; } const scroll = node("div", "boss-wiki-scroll"), table = node("table", "boss-wiki-table"), tbody = document.createElement("tbody"); table.setAttribute("aria-label", n); table.append(tbody); scroll.append(table); body.append(scroll); for (const row of rows) copyWiki(row, tbody, d.url, true); } parent.append(link("View full boss infobox on Wiki", d.url)); }
+      async function renderStrategy(parent, d, token, retry = false) { const body = accordion(parent, "Strategies"); if (!d.strategy) { body.append(node("p", "wiki-intro", "No linked /Strategies guide was found on this boss page."), link("Open the encounter page", d.url)); return; } body.append(link("Source: " + d.strategy, source(d.strategy))); const status = node("p", "wiki-intro boss-status", "Loading linked strategy guide…"), content = node("div", "boss-guide"); body.append(status, content); try { const p = await loadGuide(d.strategy, retry); if (token !== version || !dialog.open) return; const root = p.doc.querySelector(".mw-parser-output") || p.doc.body; for (const child of root.childNodes) copyWiki(child, content, source(p.title)); if (!clean(content) && !content.querySelector("img")) throw new Error("Empty guide"); status.remove(); body.append(node("p", "boss-reference-note", "Guide content is from the linked OSRS Wiki page. Wiki scripts, video embeds and interactive widgets are not run here; equipment tabs appear as readable sections.")); } catch { if (token !== version || !dialog.open) return; status.textContent = "The linked strategy guide could not load. The source link above opens the full guide."; const b = node("button", "secondary-button boss-retry", "Retry strategy guide"); b.type = "button"; b.addEventListener("click", () => { body.parentElement.remove(); renderStrategy(parent, d, token, true); }); body.append(b); } }
+      const quantityInput = document.getElementById("collection-item-quantity"), quantityMinus = document.getElementById("collection-item-minus"), quantityPlus = document.getElementById("collection-item-plus"), quantitySave = document.getElementById("collection-item-save"), itemMessage = document.getElementById("collection-item-message"); quantityInput.max = String(MAX_QUANTITY);
+      function message(t, error = false) { itemMessage.textContent = t; itemMessage.classList.toggle("error", error); } function paintItem(tile, state) { const unknown = !state, q = quantityOf(state, tile.dataset.itemName), collected = q > 0; tile.classList.toggle("is-collected", collected); tile.classList.toggle("is-missing", !unknown && !collected); tile.querySelector(".boss-log-badge").textContent = unknown ? "Status unavailable" : collected ? "×" + q.toLocaleString() : "Not collected"; tile.setAttribute("aria-label", tile.dataset.itemName + " — " + (unknown ? "status unavailable" : collected ? q.toLocaleString() + " collected" : "not collected") + ". Open item details."); }
+      function refreshCollectionViews() { for (const w of reference.querySelectorAll("[data-collection-profile]")) { const snap = snapshot(w.dataset.collectionProfile), tiles = [...w.querySelectorAll("button.boss-log-item")]; for (const t of tiles) paintItem(t, snap.state); const count = tiles.filter(t => quantityOf(snap.state, t.dataset.itemName) > 0).length; w.querySelector(".boss-log-count").textContent = snap.state ? count + " / " + tiles.length + " unique items collected" : "Collection status unavailable"; const progress = w.querySelector("progress"); progress.max = Math.max(1, tiles.length); progress.value = count; progress.hidden = !snap.state; const warning = w.querySelector(".boss-log-storage-warning"); warning.textContent = snap.error; warning.hidden = !snap.error; } }
+      function updateQuantityButtons() { let draft = null; try { draft = parseQuantity(quantityInput.value); } catch { } const enabled = !!itemContext?.editable; quantityInput.disabled = !enabled; quantitySave.disabled = !enabled; quantityMinus.disabled = !enabled || draft === null || draft === 0; quantityPlus.disabled = !enabled || draft === null || draft >= MAX_QUANTITY; }
+      function refreshItemModal() { if (!itemContext) return; const snap = snapshot(itemContext.profile), entry = snap.state?.items[itemKey(itemContext.name)], q = quantityOf(snap.state, itemContext.name), collected = q > 0; itemContext.savedQuantity = q; itemContext.editable = !!snap.state && activePlayer() === itemContext.profile; const label = document.getElementById("collection-item-state"); label.textContent = !snap.state ? "Status unavailable" : collected ? "Collected · ×" + q.toLocaleString() : "Not collected"; label.classList.toggle("is-collected", collected); quantityInput.value = snap.state ? String(q) : ""; updateQuantityButtons(); const date = entry?.collectedAt ? new Date(entry.collectedAt) : null; document.getElementById("collection-item-date").textContent = date && !Number.isNaN(date.getTime()) ? "First marked collected: " + date.toLocaleString() : ""; return snap; }
+      function openItem(name, tab, profile, origin) { itemContext = { name, tab, profile, origin, savedQuantity: 0, editable: false }; const request = ++itemRequest; document.getElementById("collection-item-title").textContent = name; document.getElementById("collection-item-context").textContent = tab + " · " + (profile || "No active player"); document.getElementById("collection-item-wiki").href = source(name); const art = document.getElementById("collection-item-art"); art.replaceChildren(node("span", "muted", "Loading image…")); resetDropRate(); message(""); const snap = refreshItemModal(); if (snap?.error) message(snap.error, true); if (!itemDialog.open) itemDialog.showModal(); document.body.classList.add("modal-open"); const boss = document.getElementById("boss-title").textContent; itemDialog.dispatchEvent(new CustomEvent("collection:item-open", { detail: { item: name, collection: tab, profile, quantity: snap?.state ? quantityOf(snap.state, name) : null, boss, killsText: document.getElementById("boss-detail-count").textContent, itemURL: source(name) } })); showDropRate(name, boss, profile, request); collectionArt().then(map => { if (request !== itemRequest || !itemDialog.open) return; art.replaceChildren(); const url = map.get(key(name)); if (url) art.append(picture(url, name)); else art.append(node("span", "muted", "Image unavailable")); }).catch(() => { if (request === itemRequest && itemDialog.open) art.replaceChildren(node("span", "muted", "Image unavailable")); }); }
+      function commitQuantity(delta = null) { if (!itemContext) return; try { if (activePlayer() !== itemContext.profile) throw new Error("The active player changed. Reopen this item before editing it."); const draft = parseQuantity(quantityInput.value), fresh = readProgress(itemContext.profile), q = delta === null ? draft : validateQuantity((quantityInput.value === String(itemContext.savedQuantity) ? quantityOf(fresh, itemContext.name) : draft) + delta); saveQuantity(itemContext.profile, itemContext.name, q); refreshCollectionViews(); refreshItemModal(); message("Quantity saved: " + q.toLocaleString() + " on this device."); } catch (e) { message((e.message || "Could not save quantity.") + " No change was saved.", true); updateQuantityButtons(); } }
+      document.getElementById("collection-item-quantity-form").addEventListener("submit", e => { e.preventDefault(); commitQuantity(); }); quantityMinus.addEventListener("click", () => commitQuantity(-1)); quantityPlus.addEventListener("click", () => commitQuantity(1)); quantityInput.addEventListener("input", () => { updateQuantityButtons(); message("Unsaved quantity — choose Save quantity or use − / + to save it."); }); itemDialog.addEventListener("close", () => { itemRequest++; const origin = itemContext?.origin; itemContext = null; document.body.classList.toggle("modal-open", !!document.querySelector("dialog[open]")); if (origin?.isConnected && dialog.open) origin.focus(); }); window.addEventListener("storage", e => { if (e.key === null || e.key.startsWith(PROGRESS_PREFIX)) { refreshCollectionViews(); if (itemDialog.open) { const snap = refreshItemModal(); message(snap?.error || "Quantity refreshed from another tab.", !!snap?.error); } } }); itemDialog.addEventListener("collection:request-quantity", () => { if (!itemContext) return; const snap = snapshot(itemContext.profile); itemDialog.dispatchEvent(new CustomEvent("collection:quantity-value", { detail: { quantity: snap.state ? quantityOf(snap.state, itemContext.name) : null } })); });
+      function renderCollection(parent, name, token) { const w = section(parent, "Collection Log"), tab = collectionFor(name); if (!tab) { w.append(node("p", "wiki-intro", "No dedicated Collection Log page is mapped to this encounter. No items have been guessed from its drop table."), link("Browse the Collection Log", source("Collection log"))); return; } const logItems = collections[tab], profile = activePlayer(); w.dataset.collectionProfile = profile; w.append(node("p", "wiki-intro", tab), node("p", "boss-log-count", "")); const progress = node("progress", "boss-log-progress"); progress.setAttribute("aria-label", tab + " unique-item collection progress"); w.append(progress, node("p", "boss-log-storage-warning error", "")); if (key(tab) !== key(name)) w.append(node("p", "boss-reference-note", "Shared " + tab + " collection page: this list can include rewards from other bosses or modes.")); const grid = node("div", "boss-log-grid"); w.append(grid); const slots = []; for (const item of logItems) { const tile = node("button", "boss-log-item"), icon = node("span", "boss-log-icon"); tile.type = "button"; tile.dataset.itemName = item; tile.setAttribute("aria-haspopup", "dialog"); tile.setAttribute("aria-controls", "collection-item-dialog"); icon.setAttribute("aria-hidden", "true"); tile.append(icon, node("span", "boss-log-name", item), node("span", "boss-log-badge", "")); tile.addEventListener("click", () => openItem(item, tab, profile, tile)); grid.append(tile); slots.push({ name: item, icon }); } refreshCollectionViews(); const artStatus = node("p", "boss-reference-note", "Loading item images…"); w.append(artStatus); collectionArt().then(map => { if (token !== version || !dialog.open) return; let shown = 0; for (const { name, icon } of slots) { const url = map.get(key(name)); if (url) { icon.append(picture(url, "")); shown++; } else icon.hidden = true; } artStatus.textContent = shown < logItems.length ? "Some images are unavailable; all item quantities can still be edited." : ""; }).catch(() => { if (token !== version || !dialog.open) return; for (const { icon } of slots) icon.hidden = true; artStatus.textContent = "Images could not load. Quantity tracking still works."; }); w.append(node("p", "boss-reference-note", "Tap an item to edit its quantity. Zero means uncollected. Duplicate drops do not increase unique-item completion. Progress is saved per player on this browser/device, not synced with RuneScape. Shared items use the same quantity across collection pages. Clearing site data removes saved progress."), link("Collection Log source", source("Collection log") + "#" + encodeURIComponent(tab.replace(/ /g, "_")))); }
+      async function showDetails(name, retry = false) { const token = ++version; reference.replaceChildren(); const encounter = node("div", "boss-encounter-reference"); reference.append(encounter); encounter.append(node("p", "wiki-intro boss-status", "Loading encounter information…")); renderCollection(reference, name, token); try { const d = await loadBoss(name, retry); if (token !== version || !dialog.open) return; encounter.replaceChildren(); if (d.image) { const hero = node("div", "boss-hero"); hero.append(picture(d.image, name)); encounter.append(hero); } renderStats(encounter, d, name); renderStrategy(encounter, d, token); } catch { if (token !== version || !dialog.open) return; encounter.replaceChildren(node("p", "wiki-intro boss-status", "Wiki information could not load. Your personal stats and collection tracking remain available.")); const b = node("button", "secondary-button boss-retry", "Retry encounter information"); b.type = "button"; b.addEventListener("click", () => showDetails(name, true)); encounter.append(b, document.createTextNode(" "), link("Open OSRS Wiki", source(pageFor(name)))); } }
+      list.addEventListener("click", e => {
+        const card = e.target.closest(".boss-card");
+        if (!card) return;
+        const name = card.querySelector(".boss-name")?.textContent?.trim();
+        if (!name) return;
+        // Ensure injected raid cards use the same detail and Collection Log view.
+        if (!dialog.open) dialog.showModal();
+        document.body.classList.add("modal-open");
+        showDetails(name);
+      });
+      dialog.addEventListener("close", () => { version++; if (itemDialog.open) itemDialog.close(); reference.replaceChildren(); document.body.classList.toggle("modal-open", !!document.querySelector("dialog[open]")); });
+    }, { once: true });
+  </script>
+  <!-- Wiki-style dry calculator; isolated from saved ownership and reference rates. -->
+  <script>
+    /* Wiki Lua calculator port: output wording, probability bullets and flavour text. */
+    document.addEventListener("DOMContentLoaded", () => {
+      "use strict"; const dialog = document.getElementById("collection-item-dialog"), form = document.getElementById("dry-form"); if (!dialog || !form) return;
+
+      function expr(input) { let t = String(input).replace(/,/g, "").trim(); if (!t || t.length > 512) return null; if (/^\s*(?:\d+(?:\.\d*)?|\.\d+)\s*%\s*$/.test(t)) t = "(" + t.replace(/%\s*$/, "") + ")/100"; const tokens = []; let offset = 0; while (offset < t.length) { if (/\s/.test(t[offset])) { offset++; continue; } const m = t.slice(offset).match(/^(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?/i); if (m) { tokens.push(Number(m[0])); offset += m[0].length; } else if ("+-*/%^()".includes(t[offset])) tokens.push(t[offset++]); else return null; if (tokens.length > 256) return null; } let i = 0, depth = 0; function primary() { if (++depth > 64) throw Error(); let v; if (tokens[i] === "(") { i++; v = add(); if (tokens[i++] !== ")") throw Error(); } else { v = tokens[i++]; if (typeof v !== "number") throw Error(); } depth--; return v; } function power() { let v = primary(); if (tokens[i] === "^") { i++; v = Math.pow(v, unary()); } return v; } function unary() { if (++depth > 64) throw Error(); let v; if (tokens[i] === "+") { i++; v = unary(); } else if (tokens[i] === "-") { i++; v = -unary(); } else v = power(); depth--; return v; } function multiply() { let v = unary(); while (["*", "/", "%"].includes(tokens[i])) { const op = tokens[i++], r = unary(); v = op === "*" ? v * r : op === "/" ? v / r : v % r; } return v; } function add() { let v = multiply(); while (tokens[i] === "+" || tokens[i] === "-") { const op = tokens[i++], r = multiply(); v = op === "+" ? v + r : v - r; } return v; } try { const v = add(); return i === tokens.length && Number.isFinite(v) ? v : null; } catch { return null; } }
+      const flavourTexts = [
+        [-1, 1, "You are some sort of sentient water being you're so not-dry. How'd you even do this?"],
+        [1, 10, "You're a higher % water than a watermelon.", "Or you would be if you had gotten any drops. But you didn't."],
+        [10, 20, "Only ironmen can be this lucky.", "But you got no drops, so I guess you're not an ironman."],
+        [20, 30, "🥄 Spooned 🥄", "j/k you got no drops"],
+        [30, 40, "Your friends will be jealous.", "...If you got any drops."],
+        [40, 49, "You're quite the lucker aren't you.", "Or not, since you got no drops."],
+        [49, 51, "A perfect mix of dry and undry, as all things should be."],
+        [51, 61, "Nothing interesting happens.", "Over half of your friends would have got a drop by now, though."],
+        [61, 65, "An unenlightened being would say 'but 1/x over x kills means I should get it', but you know better now."],
+        [65, 73, "Nothing interesting happens.", "Not even any drops."],
+        [73, 74, "😂😂😂"], [74, 85, "oof"],
+        [85, 90, "A national emergency has been declared in your drop log."],
+        [90, 95, "Right, time to post on reddit."],
+        [95, 99, "You after being this dry: [[File:Skeleton (level 21, 1).png|link=Skeleton|80x80px]]"],
+        [99, 99.5, "You are so dry you have collapsed into the dry singularity. The dryularity, if you will."],
+        [99.5, 99.9, "The vacuum of space has more activity than your drop log."],
+        [99.9, 99.99, "Wow that's so rare! Seems like it's bugged. We tweeted @JagexAsh for you, we're sure he'll get to the bottom of it in the next 24 hours."],
+        [99.99, 1000, "Did you forget to talk to [[Oziach]]?"]
+      ];
+      function flavourText(x, o) { for (const v of flavourTexts) if (x >= v[0] && x < v[1]) return v[2] + (o === 0 && v[3] ? " " + v[3] : ""); return ""; }
+      function binomDist(logP, logQ, n, k) { const diff = logP - logQ; let logPX = n * logQ, sum = 0; for (let x = 1; x <= k; x++) { sum += Math.exp(logPX); logPX += Math.log(n - x + 1) - Math.log(x) + diff; } return [sum, Math.exp(logPX)]; }
+      function wikiFixed(v, digits) { if (!Number.isFinite(v)) return "inf"; const negative = v < 0; v = Math.abs(v); const view = new DataView(new ArrayBuffer(8)); view.setFloat64(0, v, false); const hi = view.getUint32(0, false), lo = view.getUint32(4, false), e = (hi >>> 20) & 2047; let m = (BigInt(hi & 1048575) << 32n) | BigInt(lo); if (e !== 0) m |= 1n << 52n; const shift = (e === 0 ? -1022 : e - 1023) - 52; let numerator = m * (10n ** BigInt(digits)), denominator = 1n; if (shift >= 0) numerator <<= BigInt(shift); else denominator <<= BigInt(-shift); let rounded = numerator / denominator; const twice = 2n * (numerator % denominator); if (twice > denominator || (twice === denominator && (rounded & 1n) === 1n)) rounded++; let t = rounded.toString(); if (digits) { t = t.padStart(digits + 1, "0"); t = t.slice(0, -digits) + "." + t.slice(-digits); } return (negative ? "-" : "") + t; }
+      function calcWiki(chanceTxt, kc, obtained) { chanceTxt = String(chanceTxt).trim(); let chance = expr(chanceTxt); if (chance === null) return { error: "Looks like there was an error with your input chance, try typing it in again" }; if (chance > 1) { chance = 1 / chance; chanceTxt = "1/" + chanceTxt; } else if (chance <= 0) return { error: "You put your chance at 0 or negative, how you gonna get that drop?" }; const kct = String(kc).trim(); kc = kct === "" ? NaN : Number(kct); if (!Number.isFinite(kc) || kc === 0) return { error: "You ain't killed anything you crazy fool" }; const ot = String(obtained).trim(); obtained = ot === "" ? 0 : Number(ot); if (!Number.isFinite(obtained)) obtained = 0; if (kc < obtained) return { error: "More items dropped than things killed? how?" }; if (!Number.isSafeInteger(kc) || kc < 0 || !Number.isSafeInteger(obtained) || obtained < 0) return { error: "Kill count and drops obtained must be whole numbers of 0 or more." }; if (kc > 1000000000) return { error: "Please use a kill count of 1,000,000,000 or less." }; if (Math.min(obtained, kc - obtained) > 1000000) return { error: "Those inputs require too many calculation steps for this browser. Use a smaller range." }; let less = 0, equal = 0, more = 0; if (chance === 1) { equal = obtained === kc ? 1 : 0; more = obtained < kc ? 1 : 0; } else { const lp = Math.log(chance), lq = Math.log1p(-chance); if (obtained < kc / 2) { [less, equal] = binomDist(lp, lq, kc, obtained); more = 1 - less - equal; } else { [more, equal] = binomDist(lq, lp, kc, kc - obtained); less = 1 - more - equal; } } const clamp = v => Math.min(1, Math.max(0, v)); less = clamp(less); equal = clamp(equal); more = clamp(more); let flavour = flavourText(more * 100, obtained); if (kc === 1 && obtained === 1) flavour = "Perfect drop rate."; const f = wikiFixed, intro = "You killed " + kc + " monsters for an item with a " + chanceTxt + " (" + f(100 * chance, 6) + "% or 1/" + f(1 / chance, 2) + ") drop chance. You had a:", probabilities = [f(100 * equal, 8) + "% chance (1/" + f(1 / equal, 2) + ") of getting exactly " + obtained + " drops,"]; if (obtained > 0) probabilities.push(f(100 * less, 8) + "% chance (1/" + f(1 / less, 2) + ") of getting fewer than " + obtained + " drops,"); if (obtained < kc) probabilities.push(f(100 * more, 8) + "% chance (1/" + f(1 / more, 2) + ") of getting more than " + obtained + " drops,"); return { intro, probabilities, flavour, less, equal, more, chance, kc, obtained }; }
+
+
+      function mayAutofillRate(context, detail, value, manuallySet) { return !!context && !!detail.input && !manuallySet && !String(value).trim() && context.item === detail.item && context.boss === detail.boss && context.profile === detail.profile; }
+
+      const rate = document.getElementById("dry-rate"), kills = document.getElementById("dry-attempts"), drops = document.getElementById("dry-drops"), results = document.getElementById("dry-results"), status = document.getElementById("dry-message"), rates = new Map(); let context = null, rateManuallySet = false;
+
+      const el=id=>document.getElementById(id), fmt=n=>n.toLocaleString(undefined,{maximumFractionDigits:2});
+      const raidPanel=el("raid-aware-panel"), raidMode=el("raid-mode"), raidRateKind=el("raid-rate-kind"), raidSummary=el("raid-aware-summary");
+      const raidFields={cox:el("raid-cox-fields"),tob:el("raid-tob-fields"),toa:el("raid-toa-fields")};
+      function raidKind(boss){const n=String(boss||"").toLowerCase().replace(/[^a-z0-9]/g,"");if(n.includes("chambersofxeric"))return "cox";if(n.includes("theatreofblood"))return "tob";if(n.includes("tombsofamascut"))return "toa";if(n.includes("fracturedarchive")||n.includes("fracturedarchives"))return "tfa";return "";}
+      const raidModes={cox:[["normal","Normal Mode"],["challenge","Challenge Mode"]],tob:[["entry","Entry Mode — no uniques"],["normal","Normal Mode"],["hard","Hard Mode"]],toa:[["entry","Entry Mode"],["normal","Normal Mode"],["expert","Expert Mode"]],tfa:[["normal","Standard raid"],["practice","Practice mode — no rewards"]]};
+      function configureRaidPanel(){const kind=raidKind(context?.boss||context?.collection);raidPanel.hidden=!kind;if(!kind)return;raidMode.replaceChildren(...raidModes[kind].map(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;return o;}));Object.entries(raidFields).forEach(([k,node])=>node.hidden=k!==kind);raidRateKind.value="personal";raidMode.value=kind==="cox"&&String(context?.boss||"").toLowerCase().includes("challenge")?"challenge":kind==="tob"&&String(context?.boss||"").toLowerCase().includes("hard")?"hard":kind==="toa"&&String(context?.boss||"").toLowerCase().includes("expert")?"expert":kind==="tob"&&String(context?.boss||"").toLowerCase().includes("entry")?"entry":kind==="toa"&&String(context?.boss||"").toLowerCase().includes("entry")?"entry":"normal";updateRaidSummary();}
+      function raidPersonalChance(){const kind=raidKind(context?.boss||context?.collection),mode=raidMode.value,team=Number(el("raid-team-size").value);if(!kind)return {kind,adjusted:false};if(!el("raid-eligible").checked)return {error:"This character is marked as ineligible for the selected reward."};if(!Number.isInteger(team)||team<1||team>(kind==="cox"?100:8))return {error:"Enter a valid team size for this raid."};if((kind==="tob"&&mode==="entry")||(kind==="tfa"&&mode==="practice"))return {error:"This mode does not award the selected unique reward."};if(raidRateKind.value!=="unique-share")return {kind,adjusted:false};
+        if(kind==="cox"){const personal=Number(el("raid-personal-points").value),group=Number(el("raid-group-points").value);if(!Number.isFinite(personal)||!Number.isFinite(group)||personal<0||group<personal||group<=0)return {error:"Enter valid personal and team points; team points must be at least your personal points."};return {kind,adjusted:true,chance:Math.min(.657,personal/867500),note:"Estimated from your personal points at 1% per 8,675 points, capped at 65.7% for the first unique roll. Extra team rolls and multiple uniques are not modeled."};}
+        if(kind==="tob"){const share=Number(el("raid-tob-share").value);if(!Number.isFinite(share)||share<0||share>100)return {error:"Your unique-chance share must be between 0 and 100%."};return {kind,adjusted:true,chance:(mode==="hard"?.13:.11)*share/100,note:"Uses an 11% Normal or 13% Hard Mode team unique chance multiplied by your entered share. Deaths and detailed performance scaling are not automatically inferred."};}
+        if(kind==="toa"){const rl=Number(el("raid-level").value),personal=Number(el("raid-toa-personal").value),total=Number(el("raid-toa-total").value);if(!Number.isInteger(rl)||rl<0||rl>600||!Number.isFinite(personal)||!Number.isFinite(total)||personal<0||total<personal||total<=0)return {error:"Enter a raid level from 0–600 and valid personal/team points."};const scaled=rl<=310?rl:rl<=430?310+(rl-310)/3:350+(rl-430)/6;const denominator=10500-20*scaled;const teamChance=Math.min(.55,Math.max(0,total-5000)/(denominator*100));const modeFactor=mode==="entry"?0:1;return {kind,adjusted:true,chance:teamChance*(personal/total)*modeFactor,note:"Estimates your chance of being assigned a team purple from total points and raid level, then multiplies by your share of team points. Item-specific level eligibility, the additional 1/50 off-level roll, pet rolls, and tertiary rewards are not modeled."};}
+        return {kind,adjusted:false,note:"The Fractured Archive's complete unique-reward probability model is not yet implemented. Use a verified personal per-completion rate above; do not treat an unknown table rarity as a personal drop chance."};}
+      function updateRaidSummary(){if(raidPanel.hidden)return;const kind=raidKind(context?.boss||context?.collection),mode=raidMode.value;if((kind==="tob"&&mode==="entry")||(kind==="tfa"&&mode==="practice"))raidSummary.textContent="This mode does not award the selected unique. Select a reward-eligible mode or track a non-unique reward separately.";else if(kind==="tfa")raidSummary.textContent=raidRateKind.value==="unique-share"?"Automatic unique-table conversion is not available yet for The Fractured Archive. Enter a verified personal per-raid chance instead.":"Team size is recorded for context, but the entered rate remains your personal chance per completed raid.";else if(raidRateKind.value==="unique-share")raidSummary.textContent=kind==="toa"?"Uses raid level, total points and your points to estimate personal purple eligibility; verify the item is obtainable at this raid level.":kind==="cox"?"Uses your personal points for a first-roll estimate; team size and extra unique rolls can change the actual result.":"Uses the selected mode's team unique rate and your estimated share of that chance.";else raidSummary.textContent="The entered rate is treated as your personal chance per completed raid. Mode and team settings are validation/context only; switch to item share of the unique table to apply supported mechanics.";}
+      raidPanel.addEventListener("input",updateRaidSummary);raidRateKind.addEventListener("change",updateRaidSummary);raidMode.addEventListener("change",updateRaidSummary);
+      const streakCard=document.getElementById("dry-streak-card"), detailed=document.getElementById("dry-details"), helpDialog=document.getElementById("dry-help-dialog"), infoButton=document.getElementById("dry-info");
+      infoButton.addEventListener("click",()=>{if(!helpDialog.open)helpDialog.showModal();});
+      el("dry-help-close").addEventListener("click",()=>helpDialog.close());
+      helpDialog.addEventListener("click",e=>{if(e.target!==helpDialog)return;const b=helpDialog.getBoundingClientRect();if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom)helpDialog.close();});
+      helpDialog.addEventListener("close",()=>{if(dialog.open)infoButton.focus();});dialog.addEventListener("close",()=>{if(helpDialog.open)helpDialog.close();});
+      function resetCard(){streakCard.hidden=true;detailed.hidden=true;detailed.open=false;el("dry-help-odds").textContent="Calculate a result to see your selected odds here.";el("dry-equation").textContent="";}
+      function renderCard(r){
+        const n=r.kc,k=r.obtained,p=r.chance,m=n*p,zero=k===0;
+        let title="Under odds",color="var(--muted)";
+        if(m>=3){title="Bone dry";color="var(--red)";}else if(m>=2){title="Very dry";color="#df9c5b";}else if(m>=1){title="Dry";color="var(--gold)";}
+        streakCard.style.setProperty("--dry-color",zero?color:"var(--muted)");streakCard.style.setProperty("--dry-position",Math.min(100,m*25)+"%");
+        el("dry-card-title").textContent=zero?"Dry streak":"Drop luck";el("dry-status").textContent=zero?title.toUpperCase()+" · "+fmt(m)+"×":fmt(m)+" EXPECTED";
+        el("dry-count").textContent=fmt(n);el("dry-count-label").textContent=zero?"attempts without this drop":("attempts · "+fmt(k)+" drops obtained");el("dry-meter-wrap").hidden=!zero;
+        el("dry-meter").setAttribute("aria-valuenow",String(Math.min(4,m)));el("dry-meter").setAttribute("aria-valuetext",fmt(m)+" times the drop rate"+(m>4?", beyond the displayed scale":""));
+        const tail=zero?r.equal:Math.min(1,r.less+r.equal),pct=tail===0?"below numeric precision":tail*100<.001?(tail*100).toExponential(2)+"%":fmt(tail*100)+"%";
+        el("dry-tail").textContent=zero?"Chance of going this dry: "+pct+" of independent runs would have no drop after "+fmt(n)+" attempts.":"Chance of getting "+fmt(k)+" or fewer drops in "+fmt(n)+" attempts: "+pct+".";
+        el("dry-caveat").textContent=zero?"Based on the attempts entered—not an automatically tracked streak.":"Total kills and drops do not tell us how long it has been since your last drop.";
+        el("dry-help-odds").textContent="The selected item has a 1 in "+fmt(1/p)+" chance per attempt.";el("dry-equation").textContent=fmt(n)+" attempts ÷ "+fmt(1/p)+" ≈ "+fmt(m)+(zero?"×":" expected drops");streakCard.hidden=false;detailed.hidden=false;
+      }
+
+      function contextKey() { return JSON.stringify([context?.profile || "", context?.boss || "", context?.item || ""]); } function countFromText(t) { t = String(t || "").replace(/[,\s]/g, ""); return /^\d+$/.test(t) && Number.isSafeInteger(Number(t)) ? t : ""; } function reset() { resetCard(); results.replaceChildren(); results.hidden = true; status.textContent = ""; status.classList.remove("error"); }
+      function sourceLink(text, title) { const a = document.createElement("a"); a.textContent = text; a.href = "https://oldschool.runescape.wiki/w/" + encodeURIComponent(title.replace(/ /g, "_")); a.target = "_blank"; a.rel = "noopener noreferrer"; return a; }
+      function renderFlavour(t) { const p = document.createElement("p"); p.className = "dry-flavour"; const token = "[[File:Skeleton (level 21, 1).png|link=Skeleton|80x80px]]"; if (t.includes(token)) { const [b, aft] = t.split(token); p.append(document.createTextNode(b)); const a = sourceLink("", "Skeleton"), img = document.createElement("img"); img.src = "https://oldschool.runescape.wiki/w/Special:FilePath/" + encodeURIComponent("Skeleton (level 21, 1).png"); img.alt = "Skeleton"; img.width = 80; img.height = 80; img.loading = "lazy"; img.addEventListener("error", () => { a.textContent = "Skeleton"; }, { once: true }); a.append(img); p.append(a, document.createTextNode(aft || "")); } else if (t.includes("[[Oziach]]")) { const [b, a] = t.split("[[Oziach]]"); p.append(document.createTextNode(b), sourceLink("Oziach", "Oziach"), document.createTextNode(a || "")); } else p.textContent = t; return p; }
+      dialog.addEventListener("collection:item-open", e => { context = e.detail; form.reset(); reset(); document.getElementById("dry-section").open = false; rate.value = rates.get(contextKey()) || ""; rateManuallySet = !!rate.value.trim(); kills.value = countFromText(context.killsText); drops.value = Number.isSafeInteger(context.quantity) ? String(context.quantity) : "0"; document.getElementById("dry-context").textContent = context.item + " — " + (context.boss || context.collection); document.getElementById("dry-item-source").href = context.itemURL; configureRaidPanel(); });
+      dialog.addEventListener("collection:wiki-rate", e => { if (mayAutofillRate(context, e.detail, rate.value, rateManuallySet)) { rate.value = e.detail.input; reset(); } });
+      rate.addEventListener("input", () => { rateManuallySet = true; }); form.addEventListener("input", reset);
+      document.getElementById("dry-use-kc").addEventListener("click", () => { kills.value = countFromText(document.getElementById("boss-detail-count").textContent); reset(); }); document.getElementById("dry-use-quantity").addEventListener("click", () => dialog.dispatchEvent(new Event("collection:request-quantity"))); dialog.addEventListener("collection:quantity-value", e => { reset(); if (Number.isSafeInteger(e.detail.quantity)) drops.value = String(e.detail.quantity); else { status.textContent = "Saved quantity is unavailable. Enter drops obtained manually."; status.classList.add("error"); } });
+      form.addEventListener("submit", e => { e.preventDefault(); reset(); let chanceInput=rate.value; let raidInfo=null; if(!raidPanel.hidden){raidInfo=raidPersonalChance();if(raidInfo.error){status.textContent=raidInfo.error;status.classList.add("error");return;}if(raidRateKind.value==="unique-share"){if(raidInfo.adjusted){const share=expr(rate.value);if(share===null||share<=0){status.textContent="Enter a valid item share of the unique table, such as 1/7.";status.classList.add("error");return;}const itemShare=share>1?1/share:share;const effective=itemShare*raidInfo.chance;if(!(effective>0&&effective<=1)){status.textContent="The selected raid settings produce no eligible personal chance for this reward.";status.classList.add("error");return;}chanceInput=String(effective);}else if(raidInfo.kind==="tfa"){status.textContent=raidInfo.note;status.classList.add("error");return;}}} const r = calcWiki(chanceInput, kills.value, drops.value); if (!r.error) { const monster = context?.boss || context?.collection; if (monster) r.intro = r.intro.replace(/^You killed \d+ monsters?/, "You killed " + monster + " " + r.kc + (r.kc === 1 ? " time" : " times")); else r.intro = r.intro.replace(/^You killed \d+ monsters?/, "You killed " + r.kc + (r.kc === 1 ? " time" : " times")); } if (r.error) { status.textContent = r.error; status.classList.add("error"); return; } rates.set(contextKey(), rate.value.trim()); const intro = document.createElement("p"); intro.textContent = r.intro; const list = document.createElement("ul"); for (const t of r.probabilities) { const li = document.createElement("li"); li.textContent = t; list.append(li); } results.append(intro, list); if(raidInfo){const caveat=document.createElement("p");caveat.className="note";caveat.textContent=raidRateKind.value==="unique-share"?(raidInfo.note||"Raid-specific rate applied."):"Raid setup: "+raidMode.options[raidMode.selectedIndex].text+", team size "+el("raid-team-size").value+". The drop chance used is the personal per-completion chance entered above.";results.append(caveat);}results.append(renderFlavour(r.flavour)); results.hidden = false; renderCard(r); });
+    }, { once: true });
+  </script>
+<dialog id="dry-help-dialog" aria-labelledby="dry-help-title"><h2 id="dry-help-title">How dry streak works</h2><p>Your dry streak compares the attempts without the selected item with how often that item is expected to drop.</p><div class="dry-help-box"><h3>What counts as a drop</h3><p>This calculator uses the specific item and drop chance you selected or entered—not every unique from the boss. Use successful drop events, not units in a stack.</p></div><div class="dry-help-box"><h3>Your odds</h3><p id="dry-help-odds">Calculate a result to see your selected odds here.</p><div id="dry-equation" class="dry-equation"></div></div><ul class="dry-legend"><li><i style="--swatch:var(--border)"></i>Under odds<small>Below 1×</small></li><li><i style="--swatch:#d7ad4e"></i>Dry<small>1× to &lt;2×</small></li><li><i style="--swatch:#c77d35"></i>Very dry<small>2× to &lt;3×</small></li><li><i style="--swatch:#ac5849"></i>Bone dry<small>3× and up</small></li></ul><div class="dry-help-box"><h3>Manual tracking</h3><p>Use attempts since your last drop and zero drops obtained to describe a dry streak. Boss completions are lifetime totals, not automatically tracked streaks. With drops obtained above zero, the result describes overall drop luck instead.</p></div><p>Every independent attempt is a fresh roll. Being dry does not make your next drop more likely. Changing rates or multiple reward rolls may need a different model.</p><button id="dry-help-close" class="primary" type="button" autofocus>Got it</button></dialog>
+
+</body>
+
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Wiki - OSRS Progress Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="ui.css">
+  <link rel="stylesheet" href="wiki.css">
+  <script src="wiki.js" defer></script>
+  <script src="ui.js" defer></script>
+</head>
+<body data-page="wiki">
+  <main class="app wiki-app" id="wiki-page">
+    <header class="page-toolbar">
+      <a class="brand" href="index.html">OSRS Progress Tracker</a>
+      <a class="wiki-original-link" href="https://oldschool.runescape.wiki/" target="_blank" rel="noopener noreferrer">Open Wiki ↗</a>
+    </header>
+    <section class="wiki-heading wiki-heading-compact">
+      <div>
+        <p class="wiki-eyebrow">THE GRAND LIBRARY</p>
+        <h1>Old School RuneScape Wiki</h1>
+        <p class="subtitle">Your OSRS reference, right beside your progress.</p>
+      </div>
+    </section>
+    <div class="wiki-layout">
+      <aside class="wiki-sidebar" aria-label="Wiki navigation">
+        <form id="wiki-search-form" class="wiki-search-form" role="search">
+          <label for="wiki-search">Search the Wiki</label>
+          <div class="wiki-search-row">
+            <input id="wiki-search" type="search" placeholder="Search items, bosses…" autocomplete="off" aria-controls="wiki-suggestions" aria-autocomplete="list">
+            <button class="primary" type="submit">Go</button>
+          </div>
+          <div id="wiki-suggestions" class="wiki-suggestions" role="listbox" aria-label="Search suggestions" hidden></div>
+        </form>
+        <div class="wiki-sidebar-section">
+          <p class="wiki-sidebar-label">BROWSE BY CATEGORY</p>
+          <button class="wiki-category is-active" type="button" data-wiki-title="Old School RuneScape Wiki"><span>⌂</span> Wiki Home</button>
+          <button class="wiki-category" type="button" data-wiki-title="Bosses"><span>⚔</span> Bosses</button>
+          <button class="wiki-category" type="button" data-wiki-title="Monsters"><span>♜</span> Monsters</button>
+          <button class="wiki-category" type="button" data-wiki-title="Items"><span>✦</span> Items</button>
+          <button class="wiki-category" type="button" data-wiki-title="Quests"><span>📜</span> Quests</button>
+          <button class="wiki-category" type="button" data-wiki-title="Skills"><span>◈</span> Skills</button>
+          <button class="wiki-category" type="button" data-wiki-title="Training"><span>➶</span> Training & guides</button>
+          <button class="wiki-category" type="button" data-wiki-title="Money making guide"><span>◉</span> Money making</button>
+          <button class="wiki-category" type="button" data-wiki-title="Locations"><span>⌖</span> Locations</button>
+          <button class="wiki-category" type="button" data-wiki-title="Achievement Diary"><span>✓</span> Achievement diaries</button>
+        </div>
+        <div class="wiki-sidebar-note"><span class="wiki-online-dot"></span><span>Connected to the public OSRS Wiki API</span></div>
+      </aside>
+      <section class="wiki-main panel" aria-label="Wiki reader">
+        <div class="wiki-browser-toolbar">
+          <div class="wiki-browser-actions">
+            <button id="wiki-back" class="secondary-button" type="button" aria-label="Back" title="Back" disabled>←</button>
+            <button id="wiki-forward" class="secondary-button" type="button" aria-label="Forward" title="Forward" disabled>→</button>
+            <button id="wiki-refresh" class="secondary-button" type="button" aria-label="Refresh" title="Refresh">↻</button>
+          </div>
+          <div class="wiki-location-bar"><span class="wiki-location-lock">⌁</span><input id="wiki-address" class="wiki-address" type="text" aria-label="Current Wiki article" value="Old School RuneScape Wiki" autocomplete="off"></div>
+          <a id="wiki-open-external" class="wiki-open-external" href="https://oldschool.runescape.wiki/" target="_blank" rel="noopener noreferrer" aria-label="Open current page in a new tab" title="Open in new tab">↗</a>
+        </div>
+        <p id="wiki-status" class="wiki-status" role="status" aria-live="polite">Loading the Wiki library…</p>
+        <section id="wiki-results" class="wiki-results" aria-label="Search results" hidden></section>
+        <section id="wiki-reader-pane" class="wiki-reader-pane" aria-label="Wiki article reader">
+          <article id="wiki-article" class="wiki-article">
+            <div class="wiki-reader-welcome"><div class="wiki-welcome-emblem">📚</div><h2>Welcome to the Grand Library</h2><p>Search for a boss, item, quest, skill, or guide. Select a category to start exploring.</p></div>
+          </article>
+        </section>
+      </section>
+    </div>
+    <p class="wiki-footnote">Articles are loaded from the public OSRS Wiki API. An internet connection is required.</p>
+  </main>
+</body>
+</html>
