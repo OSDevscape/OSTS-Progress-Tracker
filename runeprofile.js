@@ -10,6 +10,10 @@
     achievements: "Achievement Diaries"
   };
 
+  // Each page declares its section with <body data-rp-section="...">.
+  const declared = document.body.dataset.rpSection;
+  const section = Object.hasOwn(titles, declared) ? declared : "collection";
+
   const style = document.createElement("style");
   style.textContent = `
     .rp-cards {
@@ -136,12 +140,7 @@
   `;
   document.head.append(style);
 
-  document.querySelector(
-    '[data-section="achievements"]'
-  ).textContent = titles.achievements;
-
   let player = "";
-  let section = "collection";
   let sequence = 0;
   let controller = null;
   let snapshot = null;
@@ -262,6 +261,68 @@
     );
   }
 
+  /*
+   * Collection Log only: merge the quantities you tracked by hand on the
+   * Bossing page into RuneProfile's data. The higher quantity wins, page and
+   * overall item totals are recalculated, and nothing is written back.
+   */
+  function mergeManual(data) {
+    const sync = window.OSRSCollectionSync;
+    if (!sync || !player) return { data, filled: 0 };
+
+    let manual;
+    try {
+      manual = sync.manualQuantities(player);
+    } catch {
+      return { data, filled: 0 };
+    }
+    if (!manual.size) return { data, filled: 0 };
+
+    const rpHave = new Set();
+    const mergedHave = new Set();
+
+    const tabs = data.tabs.map(tab => ({
+      ...tab,
+      pages: tab.pages.map(p => {
+        let extra = 0;
+
+        const items = p.items.map(item => {
+          const key = sync.looseName(item.name);
+          const tracked = manual.get(key) || 0;
+
+          if (item.quantity > 0) rpHave.add(key);
+          if (Math.max(item.quantity, tracked) > 0) mergedHave.add(key);
+
+          if (tracked > item.quantity) {
+            if (item.quantity < 1) extra++;
+            return { ...item, quantity: tracked, fromManual: true };
+          }
+
+          return item;
+        });
+
+        let obtained = p.obtained;
+
+        if (number(obtained)) {
+          obtained += extra;
+          if (number(p.total)) obtained = Math.min(obtained, p.total);
+        }
+
+        return { ...p, items, obtained };
+      })
+    }));
+
+    const filled = mergedHave.size - rpHave.size;
+    let obtained = data.obtained;
+
+    if (number(obtained)) {
+      obtained += filled;
+      if (number(data.total)) obtained = Math.min(obtained, data.total);
+    }
+
+    return { data: { ...data, tabs, obtained }, filled };
+  }
+
   function progress(parent, completed, total) {
     parent.append(
       node(
@@ -375,7 +436,7 @@
 
     if (!snapshot) return;
 
-    const data = snapshot.data;
+    let data = snapshot.data;
 
     if (!valid(data)) {
       host.append(
@@ -386,6 +447,14 @@
         )
       );
       return;
+    }
+
+    let filled = 0;
+
+    if (section === "collection") {
+      const merged = mergeManual(data);
+      data = merged.data;
+      filled = merged.filled;
     }
 
     const date = new Date(snapshot.fetchedAt);
@@ -417,6 +486,18 @@
           "rp-meta"
         )
       );
+
+      if (filled > 0) {
+        c.append(
+          node(
+            "p",
+            fmt(filled) +
+            " item" + (filled === 1 ? "" : "s") +
+            " filled in from your Bossing Collection Log tracking.",
+            "rp-meta"
+          )
+        );
+      }
 
       summary.append(c);
     }
@@ -742,7 +823,8 @@
                   : "Not collected"
               ) +
               " · Quantity " +
-              fmt(item.quantity)
+              fmt(item.quantity) +
+              (item.fromManual ? " · from Bossing tracker" : "")
             )
           );
 
@@ -1087,26 +1169,6 @@
     "click",
     load
   );
-
-  document.querySelectorAll(
-    "[data-section]"
-  ).forEach(button => {
-    button.addEventListener("click", () => {
-      section = button.dataset.section;
-      reset();
-
-      document.querySelectorAll(
-        "[data-section]"
-      ).forEach(el => {
-        el.setAttribute(
-          "aria-pressed",
-          String(el === button)
-        );
-      });
-
-      load();
-    });
-  });
 
   let initial = new URLSearchParams(
     location.search

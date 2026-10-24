@@ -1,17 +1,31 @@
 "use strict";
 (() => {
   const ICONS = {
-    home:"\uD83C\uDFE0", skills:"\uD83D\uDCCA", bossing:"\u2694\uFE0F", wiki:"\uD83D\uDCDA",
-    timers:"\u23F3", more:"\u2022\u2022\u2022", settings:"\u2699\uFE0F",
-    close:"\u2715", chevron:"\u25B6\uFE0F", leaf:"\uD83C\uDF3F",
-    allotments:"\uD83E\uDD55", tree:"\uD83C\uDF33", fruit:"\uD83C\uDF4E",
-    birdhouse:"\uD83D\uDC26", extras:"\uD83D\uDCE6", custom:"\u23F1\uFE0F",
-    bell:"\uD83D\uDD14", "bell-off":"\uD83D\uDD15", play:"\u25B6\uFE0F",
-    pause:"\u23F8\uFE0F", resume:"\u23EF\uFE0F", pin:"\uD83D\uDCCC"
+    home:"🏠", skills:"📊", bossing:"⚔️",
+    collection:"📖", combat:"🏆", quests:"📜", diaries:"🗺️",
+    timers:"⏳", more:"•••", settings:"⚙️",
+    close:"✕", chevron:"▶️", leaf:"🌿",
+    allotments:"🥕", tree:"🌳", fruit:"🍎",
+    birdhouse:"🐦", extras:"📦", custom:"⏱️",
+    bell:"🔔", "bell-off":"🔕", play:"▶️",
+    pause:"⏸️", resume:"⏯️", pin:"📌"
   };
   const TIMER_KEY = "osrs-farm-timers-v1";
   const current = location.pathname.split("/").pop() || "index.html";
+  // Pages reached from the More page highlight "More" in the bottom bar.
+  const MORE_PAGES = ["collection-log.html","combat-achievements.html","quests.html","achievement-diaries.html"];
   let scheduled = false;
+
+  // The Bossing page shows RuneProfile's Collection Log; scripts run in this order.
+  if (document.body && document.body.dataset.page === "bossing" && !document.querySelector("script[data-collection-sync]")) {
+    for (const file of ["collection-sync.js", "bossing-runeprofile.js"]) {
+      const script = document.createElement("script");
+      script.src = file;
+      script.async = false;
+      script.dataset.collectionSync = "true";
+      document.head.appendChild(script);
+    }
+  }
 
   function emoji(name) {
     const el = document.createElement("span");
@@ -49,12 +63,13 @@
     const nav = document.createElement("nav");
     nav.className = "shared-bottom-nav";
     nav.setAttribute("aria-label", "Main navigation");
-    const pages = [["index.html","Home","home"],["skills.html","Skills","skills"],["bossing.html","Bossing","bossing"],["wiki.html","Wiki","wiki"],["farm.html","Timers","timers"],["more.html","More","more"]];
+    const pages = [["index.html","Home","home"],["skills.html","Skills","skills"],["bossing.html","Bossing","bossing"],["farm.html","Timers","timers"],["more.html","More","more"]];
+    const active = MORE_PAGES.includes(current) ? "more.html" : current;
     for (const [page,label,icon] of pages) {
       const link = document.createElement("a");
       link.href = destination(page);
       link.dataset.navPage = page;
-      if (current === page) link.setAttribute("aria-current", "page");
+      if (active === page) link.setAttribute("aria-current", "page");
       link.appendChild(emoji(icon));
       const title = document.createElement("span");
       title.textContent = label;
