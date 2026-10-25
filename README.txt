@@ -57,9 +57,24 @@ RuneProfile data is saved under osrs-runeprofile-v1:<player>:collection.
 Items are matched by name, ignoring case and punctuation.
 
 RUNEPROFILE PAGES
-The four RuneProfile pages share runeprofile.js. Each page sets its section with
-<body data-rp-section="collection|combat|quests|achievements">. They use the
-Netlify function /.netlify/functions/runeprofile.
+Each page is its own screen with filters that fit it. runeprofile.js is the shared core
+(loading, caching, filter bar, pop-up sheet); each page adds one module:
+  collection-log.html        rp-collection.js (+ item-dialog.js, item-dialog.css)
+  combat-achievements.html   rp-combat.js
+  quests.html                rp-quests.js     (+ wiki-data.js, config.js)
+  achievement-diaries.html   rp-diaries.js    (+ wiki-data.js, config.js)
+They use the Netlify function /.netlify/functions/runeprofile.
+- Collection Log: item cards with images; tapping one opens the same pop-up as Bossing.
+- Combat Achievements: compact rows; tier / status chips, monster and type filters; tap for requirement.
+- Quests: level pills (green = you meet it, red = below it, shown as have/required),
+  filters for status, type, difficulty, length, storyline, level requirements and required skill;
+  tap a quest for the wiki Quick guide. Difficulty, length, storyline and level requirements
+  come from the OSRS Wiki and are cached in localStorage; your levels come from the Wise Old Man
+  snapshot saved by the Skills page.
+- Achievement Diaries: a button per tier; tap to see that tier's tasks and requirements
+  (from the Wiki). Crossed out when RuneProfile reports the tier complete. RuneProfile only gives
+  counts per tier, so partial tiers show "n of m" without crossing out individual tasks
+  (unless RuneProfile starts returning per-task data, which is used automatically).
 
 PRIVACY / KEYS
 A key in config.js is visible to site visitors. It is not a protected secret.

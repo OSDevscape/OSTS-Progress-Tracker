@@ -1,1 +1,174 @@
-.rp-header{margin:24px 0}.rp-header p,.rp-note,#rp-checked{color:var(--muted,#aa9978);font-size:13px;line-height:1.6}.rp-header a{color:var(--gold,#ddc078)}.rp-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.rp-controls input{flex:1;min-width:140px;background:var(--panel,#3b3021);color:var(--gold,#ddc078);border:1px solid var(--border,#806a46);border-radius:8px;padding:12px;font:inherit}.rp-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0 16px}.rp-tabs button,.rp-tabs a,.rp-controls button{padding:11px 14px;border:1px solid var(--border,#806a46);border-radius:8px;background:var(--panel,#3b3021);color:var(--gold,#ddc078);font:inherit;cursor:pointer;min-height:44px}.rp-tabs a{display:inline-flex;align-items:center;text-decoration:none}.rp-tabs button[aria-pressed=true],.rp-tabs a[aria-current=page]{border-color:var(--gold,#ddc078);background:#64502f}.rp-panel{padding:18px;border:1px solid var(--border,#806a46);border-radius:12px;background:var(--panel,#3b3021)}.rp-panel h2{flex:1;font-size:20px;margin:0}.rp-panel pre{overflow:auto;max-height:420px;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere}.rp-panel details{margin-top:16px}.rp-panel summary{cursor:pointer;padding:8px 0}#rp-status{line-height:1.6}button:disabled{opacity:.6;cursor:wait}.rp-controls button:focus-visible,.rp-tabs button:focus-visible,.rp-tabs a:focus-visible,input:focus-visible{outline:2px solid var(--gold,#ddc078);outline-offset:3px}
+/* RuneProfile pages: Collection Log, Combat Achievements, Quests, Achievement Diaries. */
+.rp-app{padding-top:0}
+.rp-top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;margin:0 -14px 8px;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border)}
+.rp-top .brand{font-size:13px;opacity:.8}
+.rp-top h1{flex:1;min-width:0;font-size:18px;line-height:1.2}
+.rp-top-actions{display:flex;align-items:center;gap:6px}
+.rp-player-btn,.rp-icon-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 12px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--gold);font-size:13px;max-width:140px}
+.rp-player-btn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rp-icon-btn{width:40px;padding:0;font-size:19px}
+.rp-icon-btn.is-busy{animation:rp-spin 1s linear infinite}
+@keyframes rp-spin{to{transform:rotate(360deg)}}
+.rp-metaline{display:flex;flex-wrap:wrap;gap:2px 12px;margin:0 0 8px;color:var(--muted);font-size:11px;min-height:16px}
+.rp-metaline p{margin:0}.rp-metaline .error{color:var(--red)}
+.rp-metaline a{font-size:11px}
+
+.rp-empty{padding:34px 16px;text-align:center;color:var(--muted)}
+.rp-empty .primary{margin-top:10px}
+
+/* Summary tiles */
+.rp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(86px,1fr));gap:6px;margin-bottom:10px}
+.rp-stat{padding:8px 6px;border:1px solid var(--border);border-radius:10px;background:var(--panel);text-align:center;min-width:0}
+.rp-stat strong{display:block;color:var(--gold);font-size:16px;line-height:1.25;overflow-wrap:anywhere}
+.rp-stat span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.4px}
+.rp-stat.wide{grid-column:span 2}
+.rp-overall{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;background:var(--panel)}
+.rp-overall .rp-bar{flex:1}
+.rp-overall strong{color:var(--gold);font-size:13px;white-space:nowrap}
+.rp-overall small{color:var(--muted);font-size:11px}
+.rp-bar{display:block;height:7px;border-radius:6px;background:#2a2218;overflow:hidden}
+.rp-bar-fill{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#8a6a2a,var(--gold))}
+.rp-bar.green .rp-bar-fill{background:linear-gradient(90deg,#5d7a44,var(--green))}
+
+/* Controls */
+.rp-controls{position:sticky;top:61px;z-index:15;margin:0 -14px 8px;padding:8px 14px 6px;background:var(--bg);border-bottom:1px solid #806a4650}
+.rp-searchrow{display:flex;gap:6px}
+.rp-search{flex:1;min-height:40px;padding:8px 12px;border-radius:10px;font-size:14px}
+.rp-filter-toggle{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--text);font-size:13px;white-space:nowrap}
+.rp-filter-toggle.is-active{border-color:var(--gold);color:var(--gold)}
+.rp-count-badge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--gold);color:#2b2112;font-size:11px;font-weight:800}
+.rp-chips{display:flex;gap:6px;margin-top:7px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:1px}
+.rp-chips::-webkit-scrollbar{display:none}
+.rp-chip{flex:0 0 auto;min-height:32px;padding:0 11px;border:1px solid var(--border);border-radius:16px;background:var(--panel);color:var(--muted);font-size:12px;white-space:nowrap}
+.rp-chip[aria-pressed=true]{border-color:var(--gold);background:var(--raised);color:var(--gold);font-weight:700}
+.rp-filter-panel{margin-top:8px;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--panel)}
+.rp-filter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.rp-field{margin:0}.rp-field span{display:block;margin-bottom:3px;font-size:11px;color:var(--muted)}
+.rp-field select{padding:8px 10px;font-size:13px;min-height:38px}
+.rp-reset{margin-top:10px;min-height:34px;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--muted);font-size:12px}
+.rp-count{margin:2px 0 8px;color:var(--muted);font-size:12px}
+.rp-more{display:block;margin:12px auto;min-height:40px;padding:0 18px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--gold)}
+.rp-none{padding:26px 10px;text-align:center;color:var(--muted)}
+
+/* Compact rows (combat achievements, quests) */
+.rp-list{display:grid;gap:5px}
+.rp-grouphead{margin:10px 0 2px;padding:4px 2px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;display:flex;justify-content:space-between;gap:8px}
+.rp-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:9px;width:100%;padding:8px 10px;border:1px solid var(--border);border-left-width:3px;border-radius:10px;background:var(--panel);color:var(--text);text-align:left}
+.rp-row:hover{background:var(--raised)}
+.rp-row.is-done{border-left-color:var(--green)}
+.rp-row.is-done .rp-row-name{color:var(--muted);text-decoration:line-through;text-decoration-color:#9eb87a99}
+.rp-row.is-doing{border-left-color:var(--gold)}
+.rp-mark{display:grid;place-items:center;width:22px;height:22px;border:2px solid var(--border);border-radius:50%;font-size:12px;color:transparent;flex-shrink:0}
+.is-done>.rp-mark{border-color:var(--green);background:var(--green);color:#1f2a14;font-weight:900}
+.is-doing>.rp-mark{border-color:var(--gold);background:linear-gradient(90deg,var(--gold) 50%,transparent 50%)}
+.rp-row-main{min-width:0}
+.rp-row-name{display:block;color:var(--gold);font-size:14px;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
+.rp-row-sub{display:block;margin-top:1px;color:var(--muted);font-size:11px;overflow-wrap:anywhere}
+.rp-row-end{display:flex;flex-direction:column;align-items:flex-end;gap:3px;font-size:11px;color:var(--muted);white-space:nowrap}
+.rp-pills{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+
+/* Tags */
+.rp-tag{display:inline-block;padding:1px 7px;border:1px solid currentColor;border-radius:9px;font-size:10px;font-weight:700;line-height:1.5;letter-spacing:.2px;white-space:nowrap}
+.tier-easy{color:#9ed49a}.tier-medium{color:#7fc4d6}.tier-hard{color:#e3b25f}.tier-elite{color:#d78f8b}.tier-master{color:#c9a0e8}.tier-grandmaster{color:#f0d56b}
+.diff-novice{color:#9ed49a}.diff-intermediate{color:#7fc4d6}.diff-experienced{color:#e3b25f}.diff-master{color:#d78f8b}.diff-grandmaster{color:#c9a0e8}.diff-special{color:#f0d56b}
+
+/* Level pills */
+.rp-lvl{display:inline-flex;align-items:center;gap:4px;padding:1px 8px 1px 4px;border:1px solid;border-radius:999px;font-size:11px;font-weight:700;line-height:1.6}
+.rp-lvl.ok{color:#b5d98f;border-color:#6f8a4e;background:#3f5a2a55}
+.rp-lvl.bad{color:#ffb3ab;border-color:#a6544d;background:#7a2c2755}
+.rp-lvl.na{color:var(--muted);border-color:var(--border);background:#0003}
+.rp-skill-icon{display:inline-grid;place-items:center;width:16px;height:16px;font-size:12px;line-height:1}
+.rp-skill-icon img{width:16px;height:16px;object-fit:contain;image-rendering:pixelated}
+.rp-lvl[data-boostable]::after{content:"*";margin-left:-1px;opacity:.7}
+
+/* Sheet (pop-up) */
+.rp-sheet{width:min(100%,560px)}
+.rp-sheet-head{display:flex;align-items:flex-start;gap:12px;padding:0 18px 12px;border-bottom:1px solid var(--border)}
+.rp-sheet-title{margin:0;font-size:20px;line-height:1.25;overflow-wrap:anywhere}
+.rp-sheet-sub{margin:2px 0 0;color:var(--muted);font-size:12px}
+.rp-sheet-body{padding:14px 18px 26px}
+.rp-sheet-close{flex-shrink:0;width:38px;height:38px;margin-left:auto;border:0;background:transparent;color:var(--muted);font-size:26px;line-height:1}
+.rp-kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:6px;margin:0 0 12px}
+.rp-callout{margin:0 0 12px;padding:11px 12px;border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:10px;background:var(--raised);line-height:1.55;overflow-wrap:anywhere}
+.rp-callout h4{margin:0 0 4px;font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.rp-callout.done{border-left-color:var(--green)}
+.rp-h{margin:16px 0 8px;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+.rp-links{display:flex;flex-wrap:wrap;gap:6px 16px;margin:10px 0 0}
+.rp-links a,.rp-link{font-size:12px}
+.rp-note{color:var(--muted);font-size:11px;margin:8px 0}
+.rp-status-note{margin:0 0 10px;padding:8px 10px;border:1px dashed var(--border);border-radius:8px;color:var(--muted);font-size:12px}
+
+/* Wiki quick guide */
+.rp-guide{font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.rp-guide h2,.rp-guide h3,.rp-guide h4{margin:14px 0 6px;font-size:14px}
+.rp-guide p{margin:6px 0}
+.rp-guide ul,.rp-guide ol{padding-left:20px;margin:6px 0}
+.rp-guide li{margin:3px 0}
+.rp-guide img{max-width:100%;height:auto;vertical-align:middle}
+.rp-guide table{display:block;overflow-x:auto;border-collapse:collapse;font-size:12px}
+.rp-guide td,.rp-guide th{padding:4px 6px;border:1px solid #806a4660}
+.rp-guide a{text-decoration:underline}
+
+/* Collection log */
+.rp-logpage{border:1px solid var(--border);border-radius:10px;background:var(--panel);overflow:hidden}
+.rp-logpage+.rp-logpage{margin-top:5px}
+.rp-logpage>summary{display:grid;grid-template-columns:minmax(0,1fr) 70px auto;align-items:center;gap:10px;padding:9px 11px;cursor:pointer;list-style:none;min-height:44px}
+.rp-logpage>summary::-webkit-details-marker{display:none}
+.rp-logpage[open]>summary{background:var(--raised);border-bottom:1px solid var(--border)}
+.rp-logpage.is-complete{border-left:3px solid var(--green)}
+.rp-logpage-name{color:var(--gold);font-weight:700;font-size:14px;overflow-wrap:anywhere}
+.rp-logpage-count{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.rp-logpage-chev{color:var(--muted);font-size:11px;transition:transform .15s}
+.rp-logpage[open] .rp-logpage-chev{transform:rotate(90deg)}
+.rp-logbody{padding:9px}
+.rp-tabhead{margin:12px 0 5px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+.rp-itemgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.rp-itemgrid .boss-log-item{padding:9px 4px}
+.rp-itemgrid .boss-log-badge{font-size:9.5px}
+.rp-itemgrid .boss-log-source{font-size:9px;color:var(--muted);overflow-wrap:anywhere}
+.boss-log-item.is-tracked .boss-log-badge::after{content:" · tracked";font-weight:400}
+@media(min-width:520px){.rp-itemgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:760px){.rp-itemgrid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+
+/* Achievement diaries */
+.rp-areas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.rp-area{padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--panel);min-width:0}
+.rp-area.is-done{border-color:#6f8a4e}
+.rp-area-head{display:flex;align-items:baseline;justify-content:space-between;gap:6px;margin-bottom:7px}
+.rp-area-name{color:var(--gold);font-size:14px;font-weight:700;overflow-wrap:anywhere}
+.rp-area-count{color:var(--muted);font-size:11px;white-space:nowrap}
+.rp-tiers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.rp-tier{display:grid;gap:3px;padding:6px 7px;border:1px solid var(--border);border-radius:9px;background:var(--raised);color:var(--text);text-align:left;min-width:0}
+.rp-tier:hover{border-color:var(--gold)}
+.rp-tier.is-done{border-color:#6f8a4e;background:#3f5a2a44}
+.rp-tier-top{display:flex;justify-content:space-between;align-items:center;gap:4px;font-size:11px;font-weight:700}
+.rp-tier-top span:last-child{color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
+.rp-tier.is-done .rp-tier-top span:last-child{color:var(--green)}
+.rp-tier .rp-bar{height:5px}
+.rp-match{margin-top:6px;color:var(--gold);font-size:11px}
+.rp-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-bottom:10px}
+.rp-tabs button{min-height:38px;padding:2px 4px;border:1px solid var(--border);border-radius:9px;background:var(--panel);color:var(--muted);font-size:12px}
+.rp-tabs button[aria-pressed=true]{border-color:var(--gold);color:var(--gold);background:var(--raised);font-weight:700}
+.rp-tabs button small{display:block;font-size:10px;color:var(--muted);font-weight:400}
+.rp-tasks{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.rp-task{display:grid;grid-template-columns:auto minmax(0,1fr);gap:9px;padding:8px 10px;border:1px solid var(--border);border-radius:9px;background:var(--panel)}
+.rp-task .rp-mark{margin-top:1px}
+.rp-task-text{line-height:1.45;overflow-wrap:anywhere}
+.rp-task-req{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:4px;color:var(--muted);font-size:11px}
+.rp-task.is-done{background:#2d3a1f55;border-color:#6f8a4e88}
+.rp-task.is-done .rp-task-text{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--green);text-decoration-thickness:2px}
+.rp-task.is-done .rp-task-req{text-decoration:line-through;opacity:.7}
+.rp-task.is-done .rp-mark{border-color:var(--green);background:var(--green);color:#1f2a14;font-weight:900}
+.rp-task.is-hit{outline:2px solid var(--gold)}
+
+@media(min-width:700px){
+  .rp-areas{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .rp-list.cols{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rp-filter-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .rp-sheet-body,.rp-sheet-head{padding-inline:22px}
+}
+@media(max-width:380px){.rp-top .brand{display:none}.rp-areas{grid-template-columns:1fr}}
+.rp-dialog-small{width:min(calc(100% - 28px),380px);margin:auto;border-radius:18px;padding:18px}
+.rp-dialog-small h2{font-size:18px;margin-bottom:12px}
+.rp-dialog-small .rp-actions{display:flex;gap:8px;margin-top:12px}
+.rp-dialog-small .rp-actions button{flex:1}
